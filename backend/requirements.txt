@@ -1,0 +1,43 @@
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+pydantic==2.7.1
+pydantic-settings==2.2.1
+
+# Database
+asyncpg==0.29.0
+psycopg2-binary==2.9.9
+
+# Cache / queue
+redis[hiredis]==5.0.4
+
+# Vector DB
+qdrant-client==1.9.1
+
+# RAG / LlamaIndex
+llama-index==0.10.43
+llama-index-vector-stores-qdrant==0.2.8
+llama-index-llms-ollama==0.2.2
+llama-index-embeddings-ollama==0.2.1
+
+# Sentiment model (FinBERT)
+transformers==4.41.2
+torch==2.3.0
+sentencepiece==0.2.0
+
+# NER
+spacy==3.7.4
+https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl
+
+# Market data
+yfinance==0.2.38
+
+# News sources
+newsapi-python==0.2.7
+praw==7.7.1
+
+# Scheduler
+apscheduler==3.10.4
+
+# Utilities
+python-dotenv==1.0.1
+httpx==0.27.0
