@@ -10,10 +10,9 @@ class Settings(BaseSettings):
     qdrant_url: str = "http://localhost:6333"
     redis_url: str = "redis://localhost:6379"
     ollama_url: str = "http://localhost:11434"
+    # Optional: NewsAPI key for additional news sources (https://newsapi.org/register — free)
     newsapi_key: str = ""
-    reddit_client_id: str = ""
-    reddit_client_secret: str = ""
-    reddit_user_agent: str = "finsight/1.0"
+    # Reddit is scraped via public JSON endpoints — no API key needed
 
     class Config:
         env_file = ".env"

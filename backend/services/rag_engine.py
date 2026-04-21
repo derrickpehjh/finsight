@@ -1,6 +1,10 @@
 """
 LlamaIndex RAG engine backed by Qdrant + Ollama.
 Builds the index once at first query; subsequent queries reuse it.
+
+When a ticker is provided, articles fetched directly from Postgres are
+injected as hard context so the LLM always has the latest data even if
+Qdrant hasn't indexed the articles yet.
 """
 import logging
 from typing import AsyncGenerator
@@ -18,10 +22,14 @@ logger = logging.getLogger(__name__)
 _index: VectorStoreIndex | None = None
 
 SYSTEM_PROMPT = (
-    "You are a concise financial analyst. Answer questions about stocks using "
-    "recent news context retrieved for you. Cite specific headlines when relevant. "
+    "You are a concise financial analyst assistant. "
+    "When recent news context is provided, use it to answer questions and cite specific headlines. "
+    "When no specific news context is available for a ticker, still provide a helpful response: "
+    "briefly describe what you know about the company from your training knowledge, "
+    "note that no recent news was retrieved, and suggest what to watch for. "
     "Always mention the primary risk alongside any bullish thesis. "
-    "Keep responses under 150 words."
+    "Keep responses under 180 words. "
+    "Never say 'I cannot provide information' — always give the best analysis you can."
 )
 
 
@@ -63,15 +71,30 @@ def _get_index() -> VectorStoreIndex:
     return _index
 
 
-async def query_rag(question: str, ticker: str | None = None) -> AsyncGenerator[str, None]:
+async def query_rag(
+    question: str,
+    ticker: str | None = None,
+    direct_context: str = "",
+) -> AsyncGenerator[str, None]:
     """
     Stream a RAG answer token-by-token.
-    Ticker context is prepended to the question for better retrieval filtering.
+
+    direct_context: pre-fetched article text from Postgres, injected as hard
+    context at the top of the prompt so the LLM always has the latest data
+    even if Qdrant hasn't indexed those articles yet.
     """
     index = _get_index()
 
-    # Prepend ticker context so the retriever focuses on relevant docs
-    full_question = f"[{ticker}] {question}" if ticker else question
+    # Build the full question with hard context prepended
+    if direct_context:
+        full_question = (
+            f"Here are recent news articles about {ticker or 'this stock'}:\n\n"
+            f"{direct_context}\n\n"
+            f"Question: {question}"
+        )
+    else:
+        # Fallback: semantic search only
+        full_question = f"[{ticker}] {question}" if ticker else question
 
     query_engine = index.as_query_engine(
         streaming=True,
@@ -83,5 +106,5 @@ async def query_rag(question: str, ticker: str | None = None) -> AsyncGenerator[
         for token in response.response_gen:
             yield token
     except Exception as e:
-        logger.error(f"RAG query error for '{full_question}': {e}")
+        logger.error(f"RAG query error for '{question}' (ticker={ticker}): {e}")
         yield f"Unable to generate analysis: {str(e)}"

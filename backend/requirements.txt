@@ -1,4 +1,4 @@
-fastapi==0.111.0
+fastapi==0.109.2
 uvicorn[standard]==0.29.0
 pydantic==2.7.1
 pydantic-settings==2.2.1
@@ -17,7 +17,7 @@ qdrant-client==1.9.1
 llama-index==0.10.43
 llama-index-vector-stores-qdrant==0.2.8
 llama-index-llms-ollama==0.2.2
-llama-index-embeddings-ollama==0.2.1
+llama-index-embeddings-ollama==0.2.0
 
 # Sentiment model (FinBERT)
 transformers==4.41.2
@@ -28,12 +28,13 @@ sentencepiece==0.2.0
 spacy==3.7.4
 https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl
 
-# Market data
-yfinance==0.2.38
+# Market data (0.2.43+ required for Yahoo Finance cookie auth — 0.2.38 returns empty responses)
+yfinance==0.2.54
 
 # News sources
-newsapi-python==0.2.7
-praw==7.7.1
+newsapi-python==0.2.7          # optional — only used if NEWSAPI_KEY is set
+feedparser==6.0.11             # Yahoo Finance RSS, Benzinga RSS, Reuters RSS — no API key needed
+# Reddit is scraped via public JSON — no praw / no API key required
 
 # Scheduler
 apscheduler==3.10.4

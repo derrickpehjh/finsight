@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useStockDetail } from "@/app/hooks/useStockDetail";
+import { useTickerNews } from "@/app/hooks/useTickerNews";
 import { streamRagQuery } from "@/app/lib/api";
 import type { StockOverview } from "@/app/lib/types";
 
@@ -14,7 +15,9 @@ const TABS = ["Summary", "Signal", "Reddit", "Analyst"] as const;
 type Tab = typeof TABS[number];
 
 export default function StockPanel({ ticker, overview }: Props) {
-  const { detail, isLoading } = useStockDetail(ticker);
+  const { detail } = useStockDetail(ticker);
+  // Dedicated news fetch — independent of the detail endpoint so Summary is always populated
+  const { articles: allArticles, isLoading: newsLoading } = useTickerNews(ticker);
   const [activeTab, setActiveTab] = useState<Tab>("Summary");
   const [ragAnswer, setRagAnswer] = useState("");
   const [ragLoading, setRagLoading] = useState(false);
@@ -39,9 +42,9 @@ export default function StockPanel({ ticker, overview }: Props) {
   const verdictColor = score > 0.1 ? "#34d399" : score < -0.1 ? "#fb7185" : "#94a3b8";
   const scoreRing = Math.round(((score + 1) / 2) * 100);
 
-  const articles = detail?.articles ?? [];
-  const newsArticles = articles.filter(a => !a.source.startsWith("reddit"));
-  const redditPosts  = articles.filter(a =>  a.source.startsWith("reddit"));
+  // Split articles by source — newsArticles shows in Summary, redditPosts in Reddit tab
+  const newsArticles = allArticles.filter(a => !a.source?.startsWith("reddit"));
+  const redditPosts  = allArticles.filter(a =>  a.source?.startsWith("reddit"));
 
   async function runRag() {
     if (!ragQuery.trim() || ragLoading) return;
@@ -89,13 +92,13 @@ export default function StockPanel({ ticker, overview }: Props) {
           </div>
           <div className="score-text">
             <div className="sc-verdict" style={{ color: verdictColor }}>{verdict}</div>
-            <div className="sc-sub">{articles.length} sources · {capStr}</div>
+            <div className="sc-sub">{allArticles.length} sources · {capStr}</div>
           </div>
         </div>
 
         {/* Sentiment bar */}
         <div className="sent-wrap">
-          <div className="sent-hdr"><span>Sentiment Split</span><span>{articles.length} sources</span></div>
+          <div className="sent-hdr"><span>Sentiment Split</span><span>{allArticles.length} sources</span></div>
           <div className="sent-bar">
             <div style={{ width: `${bullPct}%`, background: "linear-gradient(90deg,#34d399,rgba(52,211,153,0.6))" }}/>
             <div style={{ width: `${neutralPct}%`, background: "linear-gradient(90deg,#a78bfa,rgba(167,139,250,0.6))" }}/>
@@ -130,10 +133,19 @@ export default function StockPanel({ ticker, overview }: Props) {
         {activeTab === "Summary" && (
           <>
             <div className="slbl">Recent News</div>
-            {isLoading && <div style={{ color: "var(--c3)", fontSize: 12 }}>Loading…</div>}
-            {newsArticles.slice(0, 4).map(a => (
+            {newsLoading && <div style={{ color: "var(--c3)", fontSize: 12 }}>Loading…</div>}
+            {!newsLoading && allArticles.length === 0 && (
+              <div style={{ color: "var(--c4)", fontSize: 11, fontFamily: "var(--mono)", padding: "6px 0" }}>
+                No articles yet — ingester will populate shortly.
+              </div>
+            )}
+            {/* Show non-reddit articles first; fall back to reddit posts when none exist */}
+            {(newsArticles.length > 0 ? newsArticles : redditPosts).slice(0, 5).map(a => (
               <div key={a.id} className="ni">
-                <div className={`ni-dot ${a.source.includes("reuters") || a.source.includes("bloomberg") ? "d-bull" : "d-neut"}`}/>
+                <div className={`ni-dot ${
+                  ["reuters","bloomberg","yahoo_finance","benzinga","investopedia"].some(s => (a.source ?? "").includes(s))
+                    ? "d-bull" : "d-neut"
+                }`}/>
                 <div className="ni-body">
                   <a href={a.url} target="_blank" rel="noreferrer" className="ni-txt" style={{ textDecoration: "none" }}>
                     {a.headline}
@@ -184,22 +196,57 @@ export default function StockPanel({ ticker, overview }: Props) {
                 onClick={runRag}
                 disabled={ragLoading}
                 style={{
-                  background: "rgba(6,182,212,0.12)", border: "1px solid rgba(6,182,212,0.3)",
+                  background: ragLoading ? "rgba(6,182,212,0.06)" : "rgba(6,182,212,0.12)",
+                  border: "1px solid rgba(6,182,212,0.3)",
                   borderRadius: 6, padding: "0 12px", color: "#06b6d4",
-                  fontFamily: "var(--mono)", fontSize: 11, cursor: ragLoading ? "wait" : "pointer",
+                  fontFamily: "var(--mono)", fontSize: 11,
+                  cursor: ragLoading ? "not-allowed" : "pointer",
+                  transition: "background 0.2s",
+                  minWidth: 44,
                 }}
               >
-                {ragLoading ? "…" : "Ask"}
+                {ragLoading ? "⏳" : "Ask"}
               </button>
             </div>
+
+            {/* Thinking indicator — shows between click and first token */}
+            {ragLoading && !ragAnswer && (
+              <div className="ai-card" style={{ opacity: 0.75 }}>
+                <div className="ai-beam" style={{ animation: "pulse 1.5s ease-in-out infinite" }}/>
+                <div className="ai-hdr">
+                  <div className="ai-tag">◈ RAG Analysis</div>
+                  <div className="ai-model" style={{ color: "#06b6d4", animation: "pulse 1.5s ease-in-out infinite" }}>
+                    thinking…
+                  </div>
+                </div>
+                <div style={{ display: "flex", gap: 5, padding: "6px 0" }}>
+                  {[0, 0.3, 0.6].map((delay, i) => (
+                    <div key={i} style={{
+                      width: 6, height: 6, borderRadius: "50%",
+                      background: "#06b6d4",
+                      animation: `pulse 1s ease-in-out ${delay}s infinite`,
+                      opacity: 0.8,
+                    }}/>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Streaming answer */}
             {ragAnswer && (
               <div className="ai-card">
                 <div className="ai-beam"/>
                 <div className="ai-hdr">
                   <div className="ai-tag">◈ RAG Analysis</div>
-                  <div className="ai-model">llama3.1:8b</div>
+                  <div className="ai-model" style={{ color: ragLoading ? "#06b6d4" : undefined }}>
+                    {ragLoading ? "streaming…" : "llama3.1:8b"}
+                  </div>
                 </div>
-                <div className="ai-txt" dangerouslySetInnerHTML={{ __html: ragAnswer.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") }}/>
+                <div className="ai-txt" dangerouslySetInnerHTML={{
+                  __html: ragAnswer
+                    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+                    + (ragLoading ? '<span style="display:inline-block;width:2px;height:1em;background:#06b6d4;margin-left:2px;vertical-align:middle;animation:pulse 0.8s ease-in-out infinite;">&#8203;</span>' : "")
+                }}/>
               </div>
             )}
           </>
@@ -223,6 +270,22 @@ export default function StockPanel({ ticker, overview }: Props) {
                 <div className="bc-lbl">7-Day Momentum</div>
                 <div className="bc-val" style={{ color: overview.momentum_7d >= 0 ? "#34d399" : "#fb7185" }}>
                   {overview.momentum_7d >= 0 ? "+" : ""}{overview.momentum_7d.toFixed(2)}%
+                </div>
+              </div>
+              <div className="bcard" style={{ gridColumn: "1 / -1" }}>
+                <div className="bc-lbl">Window Data Points</div>
+                <div className="bc-val" style={{
+                  color: (overview.window_count ?? 0) > 1 ? "#06b6d4" : "#94a3b8",
+                  fontSize: 22,
+                }}>
+                  {overview.window_count ?? 0}
+                </div>
+                <div className="bc-sub" style={{
+                  color: (overview.window_count ?? 0) === 0 ? "#fb7185" : "inherit",
+                }}>
+                  {(overview.window_count ?? 0) === 0
+                    ? "no data in window — showing latest"
+                    : `scored rows in selected timeframe`}
                 </div>
               </div>
             </div>

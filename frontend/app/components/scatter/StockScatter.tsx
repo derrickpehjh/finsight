@@ -23,7 +23,29 @@ const SECTOR_COLORS: Record<string, string> = {
 
 const PAD = { top: 50, right: 30, bottom: 62, left: 68 };
 const XMIN = -1.0, XMAX = 1.0;
-const YMIN = -8.0, YMAX = 7.0;
+
+function computeYBounds(stocks: StockOverview[]): [number, number] {
+  if (!stocks.length) return [-8, 8];
+  const vals = stocks.map(s => s.momentum_7d);
+  const raw_min = Math.min(...vals);
+  const raw_max = Math.max(...vals);
+  const pad = Math.max(2, (raw_max - raw_min) * 0.25);
+  // Round outward to nearest multiple of 5 for clean labels
+  const ymin = Math.floor((raw_min - pad) / 5) * 5;
+  const ymax = Math.ceil((raw_max + pad) / 5) * 5;
+  return [ymin, ymax];
+}
+
+function yGridLines(ymin: number, ymax: number): number[] {
+  const range = ymax - ymin;
+  const step = range <= 20 ? 2 : range <= 40 ? 5 : 10;
+  const lines: number[] = [];
+  const start = Math.ceil(ymin / step) * step;
+  for (let v = start; v <= ymax; v += step) {
+    if (v !== 0) lines.push(v);
+  }
+  return lines;
+}
 
 function hexToRgba(hex: string, alpha: number): string {
   const r = parseInt(hex.slice(1, 3), 16);
@@ -51,8 +73,8 @@ export default function StockScatter({ stocks, selectedTicker, onSelect }: Props
   const toX = (dataX: number, W: number) =>
     PAD.left + ((dataX - XMIN) / (XMAX - XMIN)) * (W - PAD.left - PAD.right);
 
-  const toY = (dataY: number, H: number) =>
-    H - PAD.bottom - ((dataY - YMIN) / (YMAX - YMIN)) * (H - PAD.top - PAD.bottom);
+  const toY = (dataY: number, H: number, ymin: number, ymax: number) =>
+    H - PAD.bottom - ((dataY - ymin) / (ymax - ymin)) * (H - PAD.top - PAD.bottom);
 
   // ── Draw ────────────────────────────────────────────────────────────────
   const draw = useCallback(() => {
@@ -65,8 +87,11 @@ export default function StockScatter({ stocks, selectedTicker, onSelect }: Props
     const H = canvas.height / (window.devicePixelRatio || 1);
     const pw = W - PAD.left - PAD.right;
     const ph = H - PAD.top - PAD.bottom;
+
+    const [YMIN, YMAX] = computeYBounds(stocksRef.current);
+
     const cx = toX(0, W);
-    const cy = toY(0, H);
+    const cy = toY(0, H, YMIN, YMAX);
     const t  = Date.now() * 0.001;
 
     ctx.clearRect(0, 0, W * (window.devicePixelRatio || 1), H * (window.devicePixelRatio || 1));
@@ -97,8 +122,8 @@ export default function StockScatter({ stocks, selectedTicker, onSelect }: Props
     ctx.setLineDash([]);
 
     ctx.strokeStyle = "rgba(255,255,255,0.04)";
-    [-4,-2,2,4].forEach(v => {
-      const y = toY(v, H);
+    yGridLines(YMIN, YMAX).forEach(v => {
+      const y = toY(v, H, YMIN, YMAX);
       ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(PAD.left + pw, y); ctx.stroke();
     });
     [-0.5, 0.5].forEach(v => {
@@ -117,8 +142,8 @@ export default function StockScatter({ stocks, selectedTicker, onSelect }: Props
     ctx.fillText("SENTIMENT SCORE", PAD.left + pw / 2, H - 10);
 
     ctx.fillStyle = "rgba(100,116,139,0.7)"; ctx.textAlign = "right";
-    [-4,-2,0,2,4].forEach(v => {
-      ctx.fillText((v > 0 ? "+" : "") + v + "%", PAD.left - 8, toY(v, H) + 4);
+    [YMIN, ...yGridLines(YMIN, YMAX), 0, YMAX].filter((v, i, arr) => arr.indexOf(v) === i).sort((a,b) => a-b).forEach(v => {
+      ctx.fillText((v > 0 ? "+" : "") + v.toFixed(0) + "%", PAD.left - 8, toY(v, H, YMIN, YMAX) + 4);
     });
     ctx.textAlign = "center";
     [-0.5,0,0.5].forEach(v => {
@@ -153,7 +178,7 @@ export default function StockScatter({ stocks, selectedTicker, onSelect }: Props
 
     currentStocks.forEach(stock => {
       const bx    = toX(stock.sentiment_score, W);
-      const by    = toY(stock.momentum_7d, H);
+      const by    = toY(stock.momentum_7d, H, YMIN, YMAX);
       const r     = bubbleRadius(stock.market_cap);
       const color = SECTOR_COLORS[stock.sector] ?? "#64748b";
       const isSel = stock.ticker === currentSel;
@@ -261,11 +286,12 @@ export default function StockScatter({ stocks, selectedTicker, onSelect }: Props
     const my = e.clientY - rect.top;
     const W = rect.width;
     const H = rect.height;
+    const [ym, yM] = computeYBounds(stocksRef.current);
 
     let found: StockOverview | null = null;
     for (const s of stocksRef.current) {
       const bx = toX(s.sentiment_score, W);
-      const by = toY(s.momentum_7d, H);
+      const by = toY(s.momentum_7d, H, ym, yM);
       const r  = bubbleRadius(s.market_cap);
       if (Math.hypot(mx - bx, my - by) <= r + 4) { found = s; break; }
     }
@@ -281,10 +307,11 @@ export default function StockScatter({ stocks, selectedTicker, onSelect }: Props
     const my = e.clientY - rect.top;
     const W = rect.width;
     const H = rect.height;
+    const [ym, yM] = computeYBounds(stocksRef.current);
 
     for (const s of stocksRef.current) {
       const bx = toX(s.sentiment_score, W);
-      const by = toY(s.momentum_7d, H);
+      const by = toY(s.momentum_7d, H, ym, yM);
       const r  = bubbleRadius(s.market_cap);
       if (Math.hypot(mx - bx, my - by) <= r + 4) {
         onSelect(s.ticker);

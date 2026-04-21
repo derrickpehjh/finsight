@@ -9,6 +9,8 @@ export interface StockOverview {
   neutral_pct: number;
   price: number;
   change_pct: number;
+  // Number of scoring rows in the selected time window (0 = fell back to latest)
+  window_count?: number;
 }
 
 export interface SentimentPoint {

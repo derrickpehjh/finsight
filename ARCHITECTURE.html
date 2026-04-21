@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FinSight — Architecture</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, "Inter", "Segoe UI", sans-serif;
+    background: #ffffff;
+    color: #1a1a2e;
+    padding: 48px 56px 64px;
+    min-width: 1100px;
+  }
+
+  /* ── Header ── */
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+  .logo-mark {
+    width: 44px; height: 44px;
+    background: #1a1a2e;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 800;
+    color: #06b6d4; letter-spacing: -1px;
+  }
+  .header-text h1 {
+    font-size: 26px; font-weight: 800; letter-spacing: -0.5px; color: #0f172a;
+  }
+  .header-text p {
+    font-size: 13px; color: #64748b; margin-top: 2px;
+  }
+  .divider {
+    border: none; border-top: 1.5px solid #e2e8f0;
+    margin: 20px 0 36px;
+  }
+
+  /* ── Zone wrapper ── */
+  .zone {
+    border-radius: 10px;
+    padding: 24px 28px 28px;
+    margin-bottom: 0;
+    position: relative;
+  }
+  .zone-label {
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 1.2px; text-transform: uppercase;
+    margin-bottom: 18px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .zone-label::after {
+    content: "";
+    flex: 1; height: 1px;
+    background: currentColor;
+    opacity: 0.18;
+  }
+
+  /* ── Zone colors ── */
+  .zone-sources   { background: #f8fafc; border: 1px solid #e2e8f0; }
+  .zone-sources .zone-label { color: #475569; }
+
+  .zone-pipeline  { background: #f0f4ff; border: 1px solid #c7d2fe; }
+  .zone-pipeline .zone-label { color: #4338ca; }
+
+  .zone-stores    { background: #f0fdf4; border: 1px solid #bbf7d0; }
+  .zone-stores .zone-label { color: #166534; }
+
+  .zone-api       { background: #f8fafc; border: 1px solid #e2e8f0; }
+  .zone-api .zone-label { color: #475569; }
+
+  .zone-frontend  { background: #fdf4ff; border: 1px solid #e9d5ff; }
+  .zone-frontend .zone-label { color: #7e22ce; }
+
+  .zone-deploy    { background: #fffbeb; border: 1px solid #fde68a; }
+  .zone-deploy .zone-label { color: #92400e; }
+
+  /* ── Row / grid ── */
+  .row {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .row.centered { justify-content: center; }
+  .row.spaced   { justify-content: space-between; }
+
+  /* ── Component card ── */
+  .card {
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 14px 18px;
+    min-width: 140px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    text-align: center;
+    flex: 1;
+  }
+  .card.tech    { border-color: #67e8f9; }
+  .card.store   { border-color: #86efac; }
+  .card.llm     { border-color: #a78bfa; }
+  .card.api     { border-color: #94a3b8; }
+  .card.ui      { border-color: #c084fc; }
+  .card.source  { border-color: #cbd5e1; }
+  .card.deploy  { border-color: #fcd34d; }
+
+  .card-icon {
+    font-size: 28px;
+    line-height: 1;
+    margin-bottom: 2px;
+  }
+  .card-name {
+    font-size: 13px; font-weight: 700; color: #0f172a;
+    line-height: 1.2;
+  }
+  .card-sub {
+    font-size: 11px; color: #64748b;
+    line-height: 1.4;
+  }
+  .card-tag {
+    font-size: 10px; font-weight: 600;
+    letter-spacing: 0.5px;
+    padding: 2px 7px;
+    border-radius: 99px;
+    margin-top: 2px;
+  }
+  .tag-cyan   { background: #cffafe; color: #0e7490; }
+  .tag-green  { background: #dcfce7; color: #15803d; }
+  .tag-purple { background: #f3e8ff; color: #7c3aed; }
+  .tag-slate  { background: #f1f5f9; color: #475569; }
+  .tag-amber  { background: #fef3c7; color: #92400e; }
+  .tag-rose   { background: #fff1f2; color: #be123c; }
+
+  /* ── Connector arrows ── */
+  .connector-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 10px 0;
+    gap: 0;
+  }
+  .arrow-line {
+    width: 1.5px;
+    background: #94a3b8;
+    flex: 1;
+    min-height: 20px;
+  }
+  .arrow-head {
+    width: 0; height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 7px solid #94a3b8;
+  }
+  .arrow-label {
+    font-size: 10px; color: #94a3b8;
+    font-weight: 600; letter-spacing: 0.3px;
+    margin: 2px 0;
+  }
+
+  /* horizontal flow arrow */
+  .h-arrow {
+    display: flex; align-items: center; gap: 4px;
+    color: #94a3b8; font-size: 11px; font-weight: 600;
+    align-self: center;
+    flex-shrink: 0;
+  }
+  .h-arrow::before, .h-arrow::after { content: ""; }
+  .h-line {
+    width: 32px; height: 1.5px; background: #94a3b8;
+  }
+  .h-head {
+    width: 0; height: 0;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 7px solid #94a3b8;
+  }
+
+  /* ── Big section arrow ── */
+  .section-arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 0;
+  }
+  .sa-line { width: 2px; height: 28px; background: #cbd5e1; }
+  .sa-head {
+    width: 0; height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 9px solid #cbd5e1;
+  }
+  .sa-label {
+    font-size: 10px; color: #94a3b8; font-weight: 600;
+    letter-spacing: 0.4px; margin: 3px 0 2px;
+  }
+
+  /* ── Stores sub-grid ── */
+  .stores-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+
+  /* ── API endpoints list ── */
+  .endpoints {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .ep {
+    background: #fff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1;
+    min-width: 130px;
+  }
+  .ep-method {
+    font-size: 10px; font-weight: 700;
+    color: #06b6d4; letter-spacing: 0.5px;
+  }
+  .ep-path {
+    font-size: 12px; font-weight: 700; color: #0f172a;
+    font-family: "SF Mono", "Fira Code", monospace;
+  }
+  .ep-desc {
+    font-size: 10px; color: #64748b; line-height: 1.4;
+  }
+
+  /* ── Frontend views ── */
+  .views-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .view-card {
+    background: #fff;
+    border: 1.5px solid #e9d5ff;
+    border-radius: 8px;
+    padding: 14px 16px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .view-title { font-size: 13px; font-weight: 700; color: #0f172a; }
+  .view-sub   { font-size: 11px; color: #6b7280; line-height: 1.4; }
+
+  .panel-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+
+  /* ── Flow legend ── */
+  .legend {
+    margin-top: 36px;
+    padding-top: 20px;
+    border-top: 1px solid #e2e8f0;
+    display: flex; align-items: center; gap: 28px; flex-wrap: wrap;
+  }
+  .legend-title { font-size: 11px; font-weight: 700; color: #94a3b8; letter-spacing: 0.8px; text-transform: uppercase; }
+  .legend-item  { display: flex; align-items: center; gap: 7px; font-size: 12px; color: #475569; }
+  .leg-dot { width: 10px; height: 10px; border-radius: 3px; }
+
+  /* ── Pipeline sub-zones ── */
+  .sub-zone {
+    background: rgba(255,255,255,0.6);
+    border: 1px dashed #c7d2fe;
+    border-radius: 7px;
+    padding: 14px 16px;
+    flex: 1;
+  }
+  .sub-zone-label {
+    font-size: 10px; font-weight: 700; color: #6366f1;
+    letter-spacing: 0.8px; text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<div class="header">
+  <div class="logo-mark">FS</div>
+  <div class="header-text">
+    <h1>FinSight Architecture</h1>
+    <p>Real-time financial sentiment pipeline · FastAPI + Next.js · Local-first</p>
+  </div>
+</div>
+<hr class="divider"/>
+
+
+<!-- ══ ZONE 1: NEWS SOURCES ══ -->
+<div class="zone zone-sources">
+  <div class="zone-label">📡 News Sources</div>
+  <div class="row centered">
+    <div class="card source">
+      <div class="card-icon">📈</div>
+      <div class="card-name">Yahoo Finance</div>
+      <div class="card-sub">Per-ticker RSS<br/>feed polling</div>
+      <span class="card-tag tag-slate">RSS</span>
+    </div>
+    <div class="card source">
+      <div class="card-icon">📰</div>
+      <div class="card-name">Benzinga</div>
+      <div class="card-sub">Financial news<br/>RSS stream</div>
+      <span class="card-tag tag-slate">RSS</span>
+    </div>
+    <div class="card source">
+      <div class="card-icon">🌍</div>
+      <div class="card-name">Reuters</div>
+      <div class="card-sub">Market & macro<br/>news feed</div>
+      <span class="card-tag tag-slate">RSS</span>
+    </div>
+    <div class="card source">
+      <div class="card-icon">🔑</div>
+      <div class="card-name">NewsAPI</div>
+      <div class="card-sub">Broad coverage<br/>key required</div>
+      <span class="card-tag tag-cyan">REST API</span>
+    </div>
+    <div class="card source">
+      <div class="card-icon">👽</div>
+      <div class="card-name">Reddit</div>
+      <div class="card-sub">r/stocks, r/wsb<br/>public JSON</div>
+      <span class="card-tag tag-rose">JSON</span>
+    </div>
+  </div>
+</div>
+
+<div class="section-arrow">
+  <div class="sa-line"></div>
+  <div class="sa-label">every 5 min · dedup by URL hash</div>
+  <div class="sa-head"></div>
+</div>
+
+
+<!-- ══ ZONE 2: BACKEND PIPELINE ══ -->
+<div class="zone zone-pipeline">
+  <div class="zone-label">⚙️ Backend Pipeline — FastAPI :8000</div>
+
+  <div class="row" style="align-items:stretch; gap:20px;">
+
+    <!-- Ingestion sub-zone -->
+    <div class="sub-zone">
+      <div class="sub-zone-label">Ingestion</div>
+      <div class="card tech" style="flex:none; min-width:unset; width:100%;">
+        <div class="card-icon">🔄</div>
+        <div class="card-name">Ingester</div>
+        <div class="card-sub">Background task<br/>every 5 minutes<br/>Dedup + raw store</div>
+        <span class="card-tag tag-cyan">APScheduler</span>
+      </div>
+    </div>
+
+    <!-- arrow -->
+    <div class="h-arrow" style="padding-top:40px">
+      <div class="h-line"></div>
+      <div class="h-head"></div>
+    </div>
+
+    <!-- Enrichment sub-zone -->
+    <div class="sub-zone">
+      <div class="sub-zone-label">Enrichment</div>
+      <div class="row" style="flex-direction:column; gap:10px;">
+        <div class="card tech" style="flex:none; min-width:unset;">
+          <div class="card-icon">🏷️</div>
+          <div class="card-name">NER Service</div>
+          <div class="card-sub">Extract ticker symbols from article text</div>
+          <span class="card-tag tag-cyan">spaCy</span>
+        </div>
+        <div class="card tech" style="flex:none; min-width:unset;">
+          <div class="card-icon">💹</div>
+          <div class="card-name">Price Fetcher</div>
+          <div class="card-sub">Price + momentum_7d via yfinance</div>
+          <span class="card-tag tag-cyan">yfinance</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- arrow -->
+    <div class="h-arrow" style="padding-top:40px">
+      <div class="h-line"></div>
+      <div class="h-head"></div>
+    </div>
+
+    <!-- ML sub-zone -->
+    <div class="sub-zone">
+      <div class="sub-zone-label">ML Processing</div>
+      <div class="card tech" style="flex:none; min-width:unset; width:100%;">
+        <div class="card-icon">🧠</div>
+        <div class="card-name">Processor</div>
+        <div class="card-sub">
+          FinBERT sentiment<br/>
+          nomic-embed-text<br/>
+          vectors → Qdrant
+        </div>
+        <span class="card-tag tag-purple">Continuous</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section-arrow">
+  <div class="sa-line"></div>
+  <div class="sa-label">write / read</div>
+  <div class="sa-head"></div>
+</div>
+
+
+<!-- ══ ZONE 3: DATA STORES ══ -->
+<div class="zone zone-stores">
+  <div class="zone-label">🗄️ Data Stores &amp; Inference</div>
+  <div class="stores-grid">
+    <div class="card store">
+      <div class="card-icon">🐘</div>
+      <div class="card-name">PostgreSQL</div>
+      <div class="card-sub">articles<br/>ticker_sentiment<br/>watchlist</div>
+      <span class="card-tag tag-green">:5432</span>
+    </div>
+    <div class="card store">
+      <div class="card-icon">🔷</div>
+      <div class="card-name">Qdrant</div>
+      <div class="card-sub">Article vectors<br/>Semantic search<br/>RAG retrieval</div>
+      <span class="card-tag tag-green">:6333</span>
+    </div>
+    <div class="card store">
+      <div class="card-icon">⚡</div>
+      <div class="card-name">Redis</div>
+      <div class="card-sub">API cache 60s TTL<br/>Overview per timeframe<br/>Cache bust on watchlist</div>
+      <span class="card-tag tag-green">:6379</span>
+    </div>
+    <div class="card llm">
+      <div class="card-icon">🦙</div>
+      <div class="card-name">Ollama</div>
+      <div class="card-sub">llama3.1:8b — RAG<br/>nomic-embed-text<br/>GPU accelerated</div>
+      <span class="card-tag tag-purple">:11434</span>
+    </div>
+  </div>
+</div>
+
+<div class="section-arrow">
+  <div class="sa-line"></div>
+  <div class="sa-label">query / cache</div>
+  <div class="sa-head"></div>
+</div>
+
+
+<!-- ══ ZONE 4: API LAYER ══ -->
+<div class="zone zone-api">
+  <div class="zone-label">🔌 REST API — FastAPI Routes</div>
+  <div class="endpoints">
+    <div class="ep">
+      <div class="ep-method">GET</div>
+      <div class="ep-path">/stocks/overview</div>
+      <div class="ep-desc">Sentiment + momentum per ticker. ?timeframe=1H|4H|1D|1W. Redis-cached.</div>
+    </div>
+    <div class="ep">
+      <div class="ep-method">GET</div>
+      <div class="ep-path">/news</div>
+      <div class="ep-desc">Recent articles for ?ticker=X. Postgres direct query.</div>
+    </div>
+    <div class="ep">
+      <div class="ep-method">GET · SSE</div>
+      <div class="ep-path">/rag/query</div>
+      <div class="ep-desc">Streaming analyst answer. Qdrant → context → Ollama → SSE stream.</div>
+    </div>
+    <div class="ep">
+      <div class="ep-method">GET / POST / DELETE</div>
+      <div class="ep-path">/watchlist</div>
+      <div class="ep-desc">Add/remove tickers. Busts Redis cache on mutation.</div>
+    </div>
+    <div class="ep">
+      <div class="ep-method">GET</div>
+      <div class="ep-path">/health</div>
+      <div class="ep-desc">Service liveness check for all dependencies.</div>
+    </div>
+  </div>
+</div>
+
+<div class="section-arrow">
+  <div class="sa-line"></div>
+  <div class="sa-label">proxied via Next.js rewrites</div>
+  <div class="sa-head"></div>
+</div>
+
+
+<!-- ══ ZONE 5: FRONTEND ══ -->
+<div class="zone zone-frontend">
+  <div class="zone-label">🖥️ Next.js Frontend — :3001</div>
+
+  <!-- Proxy note -->
+  <div style="font-size:11px; color:#7e22ce; font-weight:600; margin-bottom:14px; background:#f3e8ff; border-radius:6px; padding:8px 12px; display:inline-block;">
+    🔀 Next.js Rewrite Proxy · BACKEND_URL=http://backend:8000 (baked at build time)
+  </div>
+
+  <!-- Chart Views -->
+  <div style="font-size:11px; font-weight:700; color:#6b7280; letter-spacing:0.8px; text-transform:uppercase; margin-bottom:10px;">Chart Views</div>
+  <div class="views-row">
+    <div class="view-card">
+      <div class="card-icon" style="font-size:22px;">📊</div>
+      <div class="view-title">Scatter Plot</div>
+      <div class="view-sub">Sentiment × Momentum axes · bubble = market cap · color = sector</div>
+    </div>
+    <div class="view-card">
+      <div class="card-icon" style="font-size:22px;">🕸️</div>
+      <div class="view-title">Network Graph</div>
+      <div class="view-sub">Force-directed · sector gravity clusters · top-K sentiment edges</div>
+    </div>
+    <div class="view-card">
+      <div class="card-icon" style="font-size:22px;">🌡️</div>
+      <div class="view-title">Heatmap</div>
+      <div class="view-sub">Sentiment intensity grid · ticker × time · green/red signal</div>
+    </div>
+  </div>
+
+  <!-- Stock Panel -->
+  <div style="font-size:11px; font-weight:700; color:#6b7280; letter-spacing:0.8px; text-transform:uppercase; margin-bottom:10px;">Stock Panel</div>
+  <div class="panel-row">
+    <div class="view-card">
+      <div class="card-icon" style="font-size:20px;">📋</div>
+      <div class="view-title">Watchlist</div>
+      <div class="view-sub">Add/remove tickers · live price sidebar</div>
+    </div>
+    <div class="view-card">
+      <div class="card-icon" style="font-size:20px;">📰</div>
+      <div class="view-title">Summary Tab</div>
+      <div class="view-sub">Recent articles for selected ticker</div>
+    </div>
+    <div class="view-card">
+      <div class="card-icon" style="font-size:20px;">📈</div>
+      <div class="view-title">Signal Tab</div>
+      <div class="view-sub">Bull/Bear/Neutral % · price data</div>
+    </div>
+    <div class="view-card">
+      <div class="card-icon" style="font-size:20px;">🤖</div>
+      <div class="view-title">Analyst Tab</div>
+      <div class="view-sub">RAG chat · streaming SSE response · Ollama LLM</div>
+    </div>
+  </div>
+</div>
+
+<div class="section-arrow">
+  <div class="sa-line"></div>
+  <div class="sa-label">optional public access</div>
+  <div class="sa-head"></div>
+</div>
+
+
+<!-- ══ ZONE 6: DEPLOYMENT ══ -->
+<div class="zone zone-deploy">
+  <div class="zone-label">🌐 Public Deployment</div>
+  <div class="row centered">
+    <div class="card deploy" style="max-width:340px;">
+      <div class="card-icon">🚇</div>
+      <div class="card-name">ngrok Tunnel</div>
+      <div class="card-sub">
+        Static free domain<br/>
+        <code style="font-size:11px; background:#fef3c7; padding:2px 6px; border-radius:4px;">vitalistically-minuscular-jalen.ngrok-free.dev</code><br/>
+        Tunnels port 3001 → public HTTPS
+      </div>
+      <span class="card-tag tag-amber">:4040 dashboard</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ── LEGEND ── -->
+<div class="legend">
+  <span class="legend-title">Legend</span>
+  <div class="legend-item"><div class="leg-dot" style="background:#f0f4ff;border:1.5px solid #c7d2fe;"></div> Backend service</div>
+  <div class="legend-item"><div class="leg-dot" style="background:#f0fdf4;border:1.5px solid #bbf7d0;"></div> Data store</div>
+  <div class="legend-item"><div class="leg-dot" style="background:#fdf4ff;border:1.5px solid #e9d5ff;"></div> Frontend / UI</div>
+  <div class="legend-item"><div class="leg-dot" style="background:#fffbeb;border:1.5px solid #fde68a;"></div> Deployment</div>
+  <div class="legend-item"><div class="leg-dot" style="background:#f8fafc;border:1.5px solid #e2e8f0;"></div> Source / API</div>
+  <div class="legend-item" style="margin-left:auto; font-size:11px; color:#94a3b8;">FinSight v0.1.0 · Local-first · GPU recommended</div>
+</div>
+
+</body>
+</html>

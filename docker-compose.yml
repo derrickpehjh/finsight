@@ -27,11 +27,7 @@ services:
       - "6333:6333"
     volumes:
       - qdrant_data:/qdrant/storage
-    healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:6333/readyz || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    # No curl in qdrant slim image — rely on TCP-up via service_started in backend
 
   # ── Redis (cache + task queue) ─────────────────────────────────────────────
   redis:
@@ -59,12 +55,13 @@ services:
               count: 1
               capabilities: [gpu]
     # Pull models on first start, then serve
+    # Use 'ollama list' for readiness — no curl needed in the ollama image
     entrypoint: >
       /bin/bash -c "
         ollama serve &
         OLLAMA_PID=$$!
         echo 'Waiting for Ollama to start...'
-        until curl -sf http://localhost:11434/api/tags > /dev/null 2>&1; do sleep 2; done
+        until ollama list > /dev/null 2>&1; do sleep 2; done
         echo 'Pulling nomic-embed-text...'
         ollama pull nomic-embed-text
         echo 'Pulling llama3.1:8b...'
@@ -73,11 +70,11 @@ services:
         wait $$OLLAMA_PID
       "
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:11434/api/tags || exit 1"]
+      test: ["CMD-SHELL", "ollama list > /dev/null 2>&1 || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 10
-      start_period: 120s  # model pulls take time
+      start_period: 300s  # model pulls take time (nomic ~300MB + llama3.1:8b ~4.7GB)
 
   # ── FastAPI backend ────────────────────────────────────────────────────────
   backend:
@@ -100,22 +97,40 @@ services:
       postgres:
         condition: service_healthy
       qdrant:
-        condition: service_healthy
+        condition: service_started
       redis:
         condition: service_healthy
       ollama:
-        condition: service_healthy
+        condition: service_started
 
-  # ── ngrok tunnel (public URL → backend:8000) ───────────────────────────────
+  # ── Next.js frontend ──────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3000"
+    environment:
+      # Backend URL used by Next.js server-side rewrites (internal docker network)
+      BACKEND_URL: http://backend:8000
+      # NEXT_PUBLIC_API_URL is intentionally empty: browser uses relative URLs
+      # which the Next.js server proxies to BACKEND_URL above.
+      NEXT_PUBLIC_API_URL: ""
+    depends_on:
+      - backend
+
+  # ── ngrok tunnel (public URL → frontend:3000) ─────────────────────────────
+  # The frontend proxies all /stocks /news /rag /watchlist calls to the backend
+  # internally, so only ONE ngrok tunnel is needed.
   ngrok:
     image: ngrok/ngrok:latest
-    command: http --domain=${NGROK_DOMAIN} backend:8000
+    command: http --domain=${NGROK_DOMAIN} frontend:3000
     environment:
       NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
     ports:
       - "4040:4040"
     depends_on:
-      - backend
+      - frontend
 
 volumes:
   postgres_data:

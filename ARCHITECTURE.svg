@@ -1,0 +1,256 @@
+<svg width="1680" height="960" viewBox="0 0 1680 960" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="ah" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0,0 L0,7 L7,3.5 z" fill="#30363D"/></marker></defs>
+<rect x="0" y="0" width="1680" height="960" rx="0" fill="#0D1117" stroke="none" stroke-width="0"/>
+<text x="840" y="35" fill="#F0F6FC" font-size="18" font-weight="700" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">FINSIGHT</text>
+<text x="840" y="53" fill="#484F58" font-size="10" font-weight="normal" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Real-time Financial Sentiment  ·  FastAPI :8000  ·  Next.js :3001  ·  FinBERT  ·  RAG / Qdrant  ·  Local-first</text>
+<rect x="16" y="68" width="296" height="864" rx="12" fill="#161B22" stroke="#30363D" stroke-width="1"/>
+<text x="30" y="86" fill="#484F58" font-size="9" font-weight="600" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">NEWS SOURCES</text>
+<rect x="30" y="96" width="268" height="90" rx="7" fill="#1A1500" stroke="#D29922" stroke-width="1"/>
+<text x="41" y="113" fill="#F0F6FC" font-size="11" font-weight="600" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Yahoo Finance RSS</text>
+<line x1="41" y1="122" x2="287" y2="122" stroke="#30363D" stroke-width="0.5"/>
+<text x="41" y="141" fill="#8B949E" font-size="10" font-weight="normal" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Per-ticker RSS feed</text>
+<text x="41" y="155" fill="#8B949E" font-size="10" font-weight="normal" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Free · no key needed</text>
+<rect x="41" y="162" width="31" height="15" rx="7" fill="#1A1500" stroke="#D29922" stroke-width="0.8"/>
+<text x="56" y="172" fill="#D29922" font-size="8" font-weight="600" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">RSS</text>
+<rect x="30" y="196" width="268" height="90" rx="7" fill="#1A1500" stroke="#D29922" stroke-width="1"/>
+<text x="41" y="213" fill="#F0F6FC" font-size="11" font-weight="600" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Benzinga RSS</text>
+<line x1="41" y1="222" x2="287" y2="222" stroke="#30363D" stroke-width="0.5"/>
+<text x="41" y="241" fill="#8B949E" font-size="10" font-weight="normal" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Financial news stream</text>
+<text x="41" y="255" fill="#8B949E" font-size="10" font-weight="normal" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Coverage: earnings · analyst</text>
+<rect x="41" y="262" width="31" height="15" rx="7" fill="#1A1500" stroke="#D29922" stroke-width="0.8"/>
+<text x="56" y="272" fill="#D29922" font-size="8" font-weight="600" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">RSS</text>
+<rect x="30" y="296" width="268" height="90" rx="7" fill="#1A1500" stroke="#D29922" stroke-width="1"/>
+<text x="41" y="313" fill="#F0F6FC" font-size="11" font-weight="600" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Reuters RSS</text>
+<line x1="41" y1="322" x2="287" y2="322" stroke="#30363D" stroke-width="0.5"/>
+<text x="41" y="341" fill="#8B949E" font-size="10" font-weight="normal" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Macro &amp; market news</text>
+<text x="41" y="355" fill="#8B949E" font-size="10" font-weight="normal" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Global coverage</text>
+<rect x="41" y="362" width="31" height="15" rx="7" fill="#1A1500" stroke="#D29922" stroke-width="0.8"/>
+<text x="56" y="372" fill="#D29922" font-size="8" font-weight="600" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">RSS</text>
+<rect x="30" y="396" width="268" height="90" rx="7" fill="#1A1500" stroke="#D29922" stroke-width="1"/>
+<text x="41" y="413" fill="#F0F6FC" font-size="11" font-weight="600" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">NewsAPI</text>
+<line x1="41" y1="422" x2="287" y2="422" stroke="#30363D" stroke-width="0.5"/>
+<text x="41" y="441" fill="#8B949E" font-size="10" font-weight="normal" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Broad aggregation</text>
+<text x="41" y="455" fill="#8B949E" font-size="10" font-weight="normal" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">NEWSAPI_KEY required</text>
+<rect x="41" y="462" width="56" height="15" rx="7" fill="#021021" stroke="#58A6FF" stroke-width="0.8"/>
+<text x="69" y="472" fill="#58A6FF" font-size="8" font-weight="600" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">REST API</text>
+<rect x="30" y="496" width="268" height="90" rx="7" fill="#1A1500" stroke="#D29922" stroke-width="1"/>
+<text x="41" y="513" fill="#F0F6FC" font-size="11" font-weight="600" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Reddit  r/stocks</text>
+<line x1="41" y1="522" x2="287" y2="522" stroke="#30363D" stroke-width="0.5"/>
+<text x="41" y="541" fill="#8B949E" font-size="10" font-weight="normal" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Community sentiment</text>
+<text x="41" y="555" fill="#8B949E" font-size="10" font-weight="normal" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Public JSON · no auth</text>
+<rect x="41" y="562" width="36" height="15" rx="7" fill="#111820" stroke="#6E7681" stroke-width="0.8"/>
+<text x="59" y="572" fill="#6E7681" font-size="8" font-weight="600" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">JSON</text>
+<rect x="30" y="602" width="268" height="125" rx="7" fill="#071F0E" stroke="#3FB950" stroke-width="1"/>
+<text x="41" y="619" fill="#F0F6FC" font-size="11" font-weight="600" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Ingester</text>
+<line x1="41" y1="628" x2="287" y2="628" stroke="#30363D" stroke-width="0.5"/>
+<text x="41" y="647" fill="#8B949E" font-size="10" font-weight="normal" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">APScheduler · every 5 min</text>
+<text x="41" y="661" fill="#8B949E" font-size="10" font-weight="normal" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">feedparser RSS + NewsAPI REST</text>
+<text x="41" y="682" fill="#8B949E" font-size="10" font-weight="normal" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Dedup by URL hash before write</text>
+<text x="41" y="696" fill="#8B949E" font-size="10" font-weight="normal" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Watchlist-driven per-ticker RSS</text>
+<rect x="41" y="703" width="91" height="15" rx="7" fill="#071F0E" stroke="#3FB950" stroke-width="0.8"/>
+<text x="86" y="713" fill="#3FB950" font-size="8" font-weight="600" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">background task</text>
+<line x1="119" y1="592" x2="119" y2="594" stroke="#D29922" stroke-width="1.2" marker-end="url(#ah)"/>
+<line x1="208" y1="592" x2="208" y2="594" stroke="#D29922" stroke-width="1.2" marker-end="url(#ah)"/>
+<rect x="328" y="68" width="720" height="864" rx="12" fill="#161B22" stroke="#30363D" stroke-width="1"/>
+<text x="342" y="86" fill="#484F58" font-size="9" font-weight="600" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">BACKEND PIPELINE</text>
+<text x="1034" y="86" fill="#484F58" font-size="9" font-weight="normal" text-anchor="end" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">FastAPI :8000</text>
+<text x="342" y="106" fill="#484F58" font-size="8" font-weight="600" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">INGESTION PROCESSING</text>
+<rect x="342" y="114" width="326" height="90" rx="7" fill="#1C0612" stroke="#DB61A2" stroke-width="1"/>
+<text x="353" y="131" fill="#F0F6FC" font-size="11" font-weight="600" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">NER Service</text>
+<line x1="353" y1="140" x2="657" y2="140" stroke="#30363D" stroke-width="0.5"/>
+<text x="353" y="159" fill="#8B949E" font-size="10" font-weight="normal" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">spaCy entity linking</text>
+<text x="356" y="173" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">article body → ticker[]</text>
+<rect x="353" y="180" width="41" height="15" rx="7" fill="#1C0612" stroke="#DB61A2" stroke-width="0.8"/>
+<text x="373" y="190" fill="#DB61A2" font-size="8" font-weight="600" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">spaCy</text>
+<rect x="342" y="214" width="326" height="90" rx="7" fill="#1C0612" stroke="#DB61A2" stroke-width="1"/>
+<text x="353" y="231" fill="#F0F6FC" font-size="11" font-weight="600" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Price Fetcher</text>
+<line x1="353" y1="240" x2="657" y2="240" stroke="#30363D" stroke-width="0.5"/>
+<text x="353" y="259" fill="#8B949E" font-size="10" font-weight="normal" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">yfinance library</text>
+<text x="356" y="273" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">price + momentum_7d</text>
+<rect x="353" y="280" width="56" height="15" rx="7" fill="#1C0612" stroke="#DB61A2" stroke-width="0.8"/>
+<text x="381" y="290" fill="#DB61A2" font-size="8" font-weight="600" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">yfinance</text>
+<rect x="342" y="314" width="326" height="202" rx="7" fill="#1C0612" stroke="#DB61A2" stroke-width="1"/>
+<text x="353" y="331" fill="#F0F6FC" font-size="11" font-weight="600" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">FinBERT Processor</text>
+<line x1="353" y1="340" x2="657" y2="340" stroke="#30363D" stroke-width="0.5"/>
+<text x="353" y="359" fill="#8B949E" font-size="10" font-weight="normal" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Continuous background worker</text>
+<text x="353" y="380" fill="#484F58" font-size="8" font-weight="600" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">SENTIMENT SCORING  (write-time)</text>
+<text x="356" y="394" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">+pos  bullish signals</text>
+<text x="356" y="408" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">+neg  earnings miss / recall</text>
+<text x="356" y="422" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">+neu  routine disclosures</text>
+<text x="356" y="436" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">score ∈ [0,1] · capped at 1.0</text>
+<text x="353" y="457" fill="#484F58" font-size="8" font-weight="600" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">VECTOR EMBEDDING</text>
+<text x="356" y="471" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">nomic-embed-text → Qdrant</text>
+<text x="356" y="485" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">768-dim · cosine similarity</text>
+<rect x="353" y="492" width="51" height="15" rx="7" fill="#1C0612" stroke="#DB61A2" stroke-width="0.8"/>
+<text x="378" y="502" fill="#DB61A2" font-size="8" font-weight="600" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">FinBERT</text>
+<rect x="409" y="492" width="76" height="15" rx="7" fill="#0F0828" stroke="#BC8CFF" stroke-width="0.8"/>
+<text x="447" y="502" fill="#BC8CFF" font-size="8" font-weight="600" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Ollama embed</text>
+<rect x="342" y="526" width="326" height="98" rx="7" fill="#021021" stroke="#58A6FF" stroke-width="1"/>
+<text x="353" y="543" fill="#F0F6FC" font-size="11" font-weight="600" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Ingest Pipeline  —  logs-finsight.*</text>
+<line x1="353" y1="552" x2="657" y2="552" stroke="#30363D" stroke-width="0.5"/>
+<text x="356" y="571" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">pipeline: finsight-sentiment</text>
+<text x="356" y="585" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">priority: 200 · runs at index</text>
+<text x="356" y="599" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">siem.bull_score: float [0,1]</text>
+<text x="356" y="613" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">siem.high_signal: boolean</text>
+<text x="682" y="106" fill="#484F58" font-size="8" font-weight="600" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">DATA STORES</text>
+<rect x="682" y="114" width="352" height="174" rx="7" fill="#1A0E02" stroke="#E3804E" stroke-width="1"/>
+<text x="693" y="131" fill="#F0F6FC" font-size="11" font-weight="600" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">PostgreSQL</text>
+<line x1="693" y1="140" x2="1023" y2="140" stroke="#30363D" stroke-width="0.5"/>
+<text x="693" y="159" fill="#484F58" font-size="8" font-weight="600" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">TABLES</text>
+<text x="696" y="173" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">articles</text>
+<text x="696" y="187" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">  url_hash · headline · body</text>
+<text x="696" y="201" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">  published_at · source</text>
+<text x="696" y="222" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">ticker_sentiment</text>
+<text x="696" y="236" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">  ticker · bull · bear · neutral</text>
+<text x="696" y="257" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">watchlist  ·  ticker · ts</text>
+<rect x="693" y="264" width="86" height="15" rx="7" fill="#1A0E02" stroke="#E3804E" stroke-width="0.8"/>
+<text x="736" y="274" fill="#E3804E" font-size="8" font-weight="600" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Postgres :5432</text>
+<rect x="682" y="298" width="352" height="104" rx="7" fill="#021021" stroke="#58A6FF" stroke-width="1"/>
+<text x="693" y="315" fill="#F0F6FC" font-size="11" font-weight="600" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Qdrant  —  Vector Store</text>
+<line x1="693" y1="324" x2="1023" y2="324" stroke="#30363D" stroke-width="0.5"/>
+<text x="696" y="343" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">768-dim nomic-embed-text</text>
+<text x="696" y="357" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">cosine similarity search</text>
+<text x="693" y="371" fill="#8B949E" font-size="10" font-weight="normal" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Top-k retrieval for RAG context</text>
+<rect x="693" y="378" width="76" height="15" rx="7" fill="#021021" stroke="#58A6FF" stroke-width="0.8"/>
+<text x="731" y="388" fill="#58A6FF" font-size="8" font-weight="600" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Qdrant :6333</text>
+<rect x="682" y="412" width="352" height="90" rx="7" fill="#111820" stroke="#6E7681" stroke-width="1"/>
+<text x="693" y="429" fill="#F0F6FC" font-size="11" font-weight="600" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Redis  —  Cache</text>
+<line x1="693" y1="438" x2="1023" y2="438" stroke="#30363D" stroke-width="0.5"/>
+<text x="696" y="457" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">overview:{timeframe}  keys</text>
+<text x="693" y="471" fill="#8B949E" font-size="10" font-weight="normal" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">60s TTL · bust on watchlist write</text>
+<rect x="693" y="478" width="71" height="15" rx="7" fill="#111820" stroke="#6E7681" stroke-width="0.8"/>
+<text x="728" y="488" fill="#6E7681" font-size="8" font-weight="600" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Redis :6379</text>
+<rect x="682" y="512" width="352" height="125" rx="7" fill="#0F0828" stroke="#BC8CFF" stroke-width="1"/>
+<text x="693" y="529" fill="#F0F6FC" font-size="11" font-weight="600" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Ollama  —  Local LLM</text>
+<line x1="693" y1="538" x2="1023" y2="538" stroke="#30363D" stroke-width="0.5"/>
+<text x="696" y="557" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">llama3.1:8b  RAG answer gen</text>
+<text x="696" y="571" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">  ~4.7 GB VRAM · streaming SSE</text>
+<text x="696" y="592" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">nomic-embed-text  embeddings</text>
+<text x="696" y="606" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">  ~300 MB · 768-dim</text>
+<rect x="693" y="613" width="81" height="15" rx="7" fill="#0F0828" stroke="#BC8CFF" stroke-width="0.8"/>
+<text x="733" y="623" fill="#BC8CFF" font-size="8" font-weight="600" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Ollama :11434</text>
+<rect x="779" y="613" width="31" height="15" rx="7" fill="#0F0828" stroke="#BC8CFF" stroke-width="0.8"/>
+<text x="794" y="623" fill="#BC8CFF" font-size="8" font-weight="600" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">GPU</text>
+<line x1="505" y1="310" x2="505" y2="311" stroke="#DB61A2" stroke-width="1" marker-end="url(#ah)"/>
+<line x1="668" y1="415" x2="675" y2="415" stroke="#DB61A2" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="658" y="404" width="34" height="12" rx="2" fill="#0D1117"/>
+<text x="675" y="413" fill="#484F58" font-size="9" font-weight="normal" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">write</text>
+<rect x="1064" y="68" width="600" height="864" rx="12" fill="#161B22" stroke="#30363D" stroke-width="1"/>
+<text x="1078" y="86" fill="#484F58" font-size="9" font-weight="600" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">PRESENTATION LAYER</text>
+<text x="1650" y="86" fill="#484F58" font-size="9" font-weight="normal" text-anchor="end" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">:8000 API · :3001 Frontend</text>
+<text x="1078" y="106" fill="#484F58" font-size="8" font-weight="600" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">REST API  —  FastAPI :8000</text>
+<rect x="1078" y="114" width="276" height="90" rx="7" fill="#031209" stroke="#2EA043" stroke-width="1"/>
+<text x="1089" y="131" fill="#F0F6FC" font-size="11" font-weight="600" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">GET  /stocks/overview</text>
+<line x1="1089" y1="140" x2="1343" y2="140" stroke="#30363D" stroke-width="0.5"/>
+<text x="1089" y="159" fill="#8B949E" font-size="10" font-weight="normal" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">?timeframe=1H|4H|1D|1W</text>
+<text x="1092" y="173" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">sentiment + momentum per ticker</text>
+<rect x="1089" y="180" width="76" height="15" rx="7" fill="#031209" stroke="#2EA043" stroke-width="0.8"/>
+<text x="1127" y="190" fill="#2EA043" font-size="8" font-weight="600" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Redis cached</text>
+<rect x="1170" y="180" width="56" height="15" rx="7" fill="#1A0E02" stroke="#E3804E" stroke-width="0.8"/>
+<text x="1198" y="190" fill="#E3804E" font-size="8" font-weight="600" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Postgres</text>
+<rect x="1078" y="212" width="276" height="76" rx="7" fill="#031209" stroke="#2EA043" stroke-width="1"/>
+<text x="1089" y="229" fill="#F0F6FC" font-size="11" font-weight="600" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">GET  /news</text>
+<line x1="1089" y1="238" x2="1343" y2="238" stroke="#30363D" stroke-width="0.5"/>
+<text x="1089" y="257" fill="#8B949E" font-size="10" font-weight="normal" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">?ticker=X  —  recent articles</text>
+<rect x="1089" y="264" width="56" height="15" rx="7" fill="#1A0E02" stroke="#E3804E" stroke-width="0.8"/>
+<text x="1117" y="274" fill="#E3804E" font-size="8" font-weight="600" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Postgres</text>
+<rect x="1078" y="296" width="276" height="90" rx="7" fill="#031209" stroke="#2EA043" stroke-width="1"/>
+<text x="1089" y="313" fill="#F0F6FC" font-size="11" font-weight="600" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">GET  /rag/query  (SSE stream)</text>
+<line x1="1089" y1="322" x2="1343" y2="322" stroke="#30363D" stroke-width="0.5"/>
+<text x="1092" y="341" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">Qdrant top-k → prompt → Ollama</text>
+<text x="1089" y="355" fill="#8B949E" font-size="10" font-weight="normal" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Streaming Server-Sent Events</text>
+<rect x="1089" y="362" width="46" height="15" rx="7" fill="#021021" stroke="#58A6FF" stroke-width="0.8"/>
+<text x="1112" y="372" fill="#58A6FF" font-size="8" font-weight="600" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Qdrant</text>
+<rect x="1140" y="362" width="46" height="15" rx="7" fill="#0F0828" stroke="#BC8CFF" stroke-width="0.8"/>
+<text x="1163" y="372" fill="#BC8CFF" font-size="8" font-weight="600" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Ollama</text>
+<rect x="1078" y="394" width="276" height="90" rx="7" fill="#031209" stroke="#2EA043" stroke-width="1"/>
+<text x="1089" y="411" fill="#F0F6FC" font-size="11" font-weight="600" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">GET · POST · DELETE  /watchlist</text>
+<line x1="1089" y1="420" x2="1343" y2="420" stroke="#30363D" stroke-width="0.5"/>
+<text x="1089" y="439" fill="#8B949E" font-size="10" font-weight="normal" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Add / remove tickers  ·  CRUD</text>
+<text x="1092" y="453" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">busts Redis cache on mutation</text>
+<rect x="1089" y="460" width="56" height="15" rx="7" fill="#1A0E02" stroke="#E3804E" stroke-width="0.8"/>
+<text x="1117" y="470" fill="#E3804E" font-size="8" font-weight="600" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Postgres</text>
+<rect x="1150" y="460" width="66" height="15" rx="7" fill="#111820" stroke="#6E7681" stroke-width="0.8"/>
+<text x="1183" y="470" fill="#6E7681" font-size="8" font-weight="600" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Redis bust</text>
+<rect x="1078" y="492" width="276" height="76" rx="7" fill="#031209" stroke="#2EA043" stroke-width="1"/>
+<text x="1089" y="509" fill="#F0F6FC" font-size="11" font-weight="600" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">GET  /health</text>
+<line x1="1089" y1="518" x2="1343" y2="518" stroke="#30363D" stroke-width="0.5"/>
+<text x="1089" y="537" fill="#8B949E" font-size="10" font-weight="normal" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Liveness — all dependencies</text>
+<rect x="1089" y="544" width="46" height="15" rx="7" fill="#031209" stroke="#2EA043" stroke-width="0.8"/>
+<text x="1112" y="554" fill="#2EA043" font-size="8" font-weight="600" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">200 OK</text>
+<text x="1368" y="106" fill="#484F58" font-size="8" font-weight="600" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">NEXT.JS FRONTEND  —  :3001</text>
+<rect x="1368" y="114" width="282" height="104" rx="7" fill="#111820" stroke="#6E7681" stroke-width="1"/>
+<text x="1379" y="131" fill="#F0F6FC" font-size="11" font-weight="600" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Rewrite Proxy  (Next.js)</text>
+<line x1="1379" y1="140" x2="1639" y2="140" stroke="#30363D" stroke-width="0.5"/>
+<text x="1382" y="159" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">BACKEND_URL=http://backend:8000</text>
+<text x="1379" y="173" fill="#8B949E" font-size="10" font-weight="normal" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Baked at build time via Dockerfile</text>
+<text x="1382" y="187" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">ENV BACKEND_URL in builder stage</text>
+<rect x="1379" y="194" width="121" height="15" rx="7" fill="#111820" stroke="#6E7681" stroke-width="0.8"/>
+<text x="1439" y="204" fill="#6E7681" font-size="8" font-weight="600" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Next.js Rewrite Proxy</text>
+<rect x="1368" y="228" width="282" height="188" rx="7" fill="#160304" stroke="#F85149" stroke-width="1"/>
+<text x="1379" y="245" fill="#F0F6FC" font-size="11" font-weight="600" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Chart Views  —  3 Modes</text>
+<line x1="1379" y1="254" x2="1639" y2="254" stroke="#30363D" stroke-width="0.5"/>
+<text x="1379" y="273" fill="#484F58" font-size="8" font-weight="600" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">SCATTER PLOT</text>
+<text x="1382" y="287" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">sentiment × momentum axes</text>
+<text x="1382" y="301" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">bubble=mkt cap · color=sector</text>
+<text x="1379" y="322" fill="#484F58" font-size="8" font-weight="600" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">NETWORK GRAPH</text>
+<text x="1382" y="336" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">force-directed · sector gravity</text>
+<text x="1382" y="350" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">top-K sentiment edges (K=3)</text>
+<text x="1379" y="371" fill="#484F58" font-size="8" font-weight="600" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">HEATMAP</text>
+<text x="1382" y="385" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">sentiment grid · ticker × time</text>
+<rect x="1379" y="392" width="51" height="15" rx="7" fill="#160304" stroke="#F85149" stroke-width="0.8"/>
+<text x="1404" y="402" fill="#F85149" font-size="8" font-weight="600" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Scatter</text>
+<rect x="1435" y="392" width="51" height="15" rx="7" fill="#160304" stroke="#F85149" stroke-width="0.8"/>
+<text x="1460" y="402" fill="#F85149" font-size="8" font-weight="600" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Network</text>
+<rect x="1491" y="392" width="36" height="15" rx="7" fill="#160304" stroke="#F85149" stroke-width="0.8"/>
+<text x="1509" y="402" fill="#F85149" font-size="8" font-weight="600" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Heat</text>
+<rect x="1368" y="426" width="282" height="167" rx="7" fill="#160304" stroke="#F85149" stroke-width="1"/>
+<text x="1379" y="443" fill="#F0F6FC" font-size="11" font-weight="600" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Stock Panel + Watchlist</text>
+<line x1="1379" y1="452" x2="1639" y2="452" stroke="#30363D" stroke-width="0.5"/>
+<text x="1379" y="471" fill="#484F58" font-size="8" font-weight="600" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">STOCK PANEL  (3 tabs)</text>
+<text x="1382" y="485" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">Summary  articles · headlines</text>
+<text x="1382" y="499" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">Signal   bull/bear/neutral %</text>
+<text x="1382" y="513" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">Analyst  RAG chat · SSE stream</text>
+<text x="1379" y="534" fill="#484F58" font-size="8" font-weight="600" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">WATCHLIST SIDEBAR</text>
+<text x="1382" y="548" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">add / remove tickers</text>
+<text x="1382" y="562" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">live price · last update</text>
+<rect x="1379" y="569" width="81" height="15" rx="7" fill="#160304" stroke="#F85149" stroke-width="0.8"/>
+<text x="1419" y="579" fill="#F85149" font-size="8" font-weight="600" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">SSE streaming</text>
+<rect x="1368" y="603" width="282" height="104" rx="7" fill="#1A1500" stroke="#D29922" stroke-width="1"/>
+<text x="1379" y="620" fill="#F0F6FC" font-size="11" font-weight="600" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">ngrok  —  Public Tunnel (optional)</text>
+<line x1="1379" y1="629" x2="1639" y2="629" stroke="#30363D" stroke-width="0.5"/>
+<text x="1382" y="648" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">vitalistically-minuscular-jalen</text>
+<text x="1382" y="662" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', 'Fira Mono', monospace">  .ngrok-free.dev</text>
+<text x="1379" y="676" fill="#8B949E" font-size="10" font-weight="normal" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Tunnel :3001 → public HTTPS</text>
+<rect x="1379" y="683" width="71" height="15" rx="7" fill="#1A1500" stroke="#D29922" stroke-width="0.8"/>
+<text x="1414" y="693" fill="#D29922" font-size="8" font-weight="600" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">ngrok :4040</text>
+<line x1="312" y1="664" x2="321" y2="664" stroke="#3FB950" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="291" y="653" width="58" height="12" rx="2" fill="#0D1117"/>
+<text x="320" y="662" fill="#484F58" font-size="9" font-weight="normal" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">write raw</text>
+<line x1="1048" y1="201" x2="1057" y2="201" stroke="#E3804E" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="1039" y="190" width="34" height="12" rx="2" fill="#0D1117"/>
+<text x="1056" y="199" fill="#484F58" font-size="9" font-weight="normal" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">query</text>
+<line x1="1048" y1="350" x2="1057" y2="350" stroke="#58A6FF" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="1015" y="339" width="82" height="12" rx="2" fill="#0D1117"/>
+<text x="1056" y="348" fill="#484F58" font-size="9" font-weight="normal" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">vector search</text>
+<line x1="1048" y1="574" x2="1057" y2="574" stroke="#BC8CFF" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="1024" y="563" width="64" height="12" rx="2" fill="#0D1117"/>
+<text x="1056" y="572" fill="#484F58" font-size="9" font-weight="normal" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">LLM stream</text>
+<rect x="16" y="932" width="11" height="11" rx="3" fill="#1A1500" stroke="#D29922" stroke-width="0.8"/>
+<text x="31" y="942" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Sources</text>
+<rect x="81" y="932" width="11" height="11" rx="3" fill="#071F0E" stroke="#3FB950" stroke-width="0.8"/>
+<text x="96" y="942" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Ingester</text>
+<rect x="151" y="932" width="11" height="11" rx="3" fill="#1C0612" stroke="#DB61A2" stroke-width="0.8"/>
+<text x="166" y="942" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">ML pipeline</text>
+<rect x="236" y="932" width="11" height="11" rx="3" fill="#1A0E02" stroke="#E3804E" stroke-width="0.8"/>
+<text x="251" y="942" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Stores</text>
+<rect x="296" y="932" width="11" height="11" rx="3" fill="#021021" stroke="#58A6FF" stroke-width="0.8"/>
+<text x="311" y="942" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Vectors</text>
+<rect x="361" y="932" width="11" height="11" rx="3" fill="#0F0828" stroke="#BC8CFF" stroke-width="0.8"/>
+<text x="376" y="942" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">LLM</text>
+<rect x="406" y="932" width="11" height="11" rx="3" fill="#031209" stroke="#2EA043" stroke-width="0.8"/>
+<text x="421" y="942" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">API</text>
+<rect x="451" y="932" width="11" height="11" rx="3" fill="#160304" stroke="#F85149" stroke-width="0.8"/>
+<text x="466" y="942" fill="#8B949E" font-size="9" font-weight="normal" text-anchor="start" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">Frontend</text>
+<text x="1664" y="942" fill="#484F58" font-size="9" font-weight="normal" text-anchor="end" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">FinSight v0.1.0  ·  Docker Compose  ·  GPU recommended</text>
+</svg>
