@@ -6,6 +6,7 @@ import asyncpg
 
 from api.deps import get_db
 from services.rag_engine import query_rag
+from services.agentic_rag import agent_query_rag
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -102,3 +103,32 @@ async def rag_query_once(req: QueryRequest, db: asyncpg.Pool = Depends(get_db)):
         answer = "Unable to generate analysis right now. Please try again."
 
     return {"answer": answer}
+
+
+@router.post("/agent_query")
+async def rag_agent_query(req: QueryRequest, db: asyncpg.Pool = Depends(get_db)):
+    """
+    Agentic RAG endpoint. Streams SSE events:
+      - __STEP__<id>|<detail>  — progress steps (retrieve, reflect, requery, synthesize)
+      - <text token>           — final answer tokens
+      - [DONE]                 — end of stream
+    """
+    async def event_stream():
+        try:
+            async for chunk in agent_query_rag(req.q, req.ticker, db):
+                safe = chunk.replace("\n", " ")
+                yield f"data: {safe}\n\n"
+        except Exception as e:
+            logger.error(f"Agent RAG stream error: {e}")
+            yield f"data: [ERROR] {str(e)}\n\n"
+        finally:
+            yield "data: [DONE]\n\n"
+
+    return StreamingResponse(
+        event_stream(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+        },
+    )

@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { useStockDetail } from "@/app/hooks/useStockDetail";
 import { useTickerNews } from "@/app/hooks/useTickerNews";
-import { streamRagQuery } from "@/app/lib/api";
+import { streamRagQuery, streamAgentQuery } from "@/app/lib/api";
 import type { StockOverview } from "@/app/lib/types";
 
 interface Props {
@@ -23,6 +23,8 @@ export default function StockPanel({ ticker, overview }: Props) {
   const [ragLoading, setRagLoading] = useState(false);
   const [ragError, setRagError] = useState<string | null>(null);
   const [ragQuery, setRagQuery] = useState("");
+  const [agentMode, setAgentMode] = useState(false);
+  const [agentSteps, setAgentSteps] = useState<string[]>([]);
   const [showRagDebug, setShowRagDebug] = useState(false);
   const [ragDebug, setRagDebug] = useState({
     chunks: 0,
@@ -62,6 +64,7 @@ export default function StockPanel({ ticker, overview }: Props) {
     setRagLoading(true);
     setRagAnswer("");
     setRagError(null);
+    setAgentSteps([]);
     setRagDebug({ chunks: 0, chars: 0, lastChunk: "", ended: false, error: "" });
     ragBufferRef.current = "";
 
@@ -81,7 +84,15 @@ export default function StockPanel({ ticker, overview }: Props) {
     };
 
     try {
-      for await (const chunk of streamRagQuery(ragQuery, ticker ?? undefined)) {
+      const stream = agentMode
+        ? streamAgentQuery(ragQuery, ticker ?? undefined)
+        : streamRagQuery(ragQuery, ticker ?? undefined);
+      for await (const chunk of stream) {
+        if (chunk.startsWith("__STEP__")) {
+          const detail = chunk.slice(chunk.indexOf("|") + 1).replace(/\n/g, "").trim();
+          setAgentSteps(prev => [...prev, detail]);
+          continue;
+        }
         ragBufferRef.current += chunk;
         setRagDebug(prev => ({
           ...prev,
@@ -256,6 +267,22 @@ export default function StockPanel({ ticker, overview }: Props) {
                 {ragLoading ? "⏳" : "Ask"}
               </button>
               <button
+                onClick={() => setAgentMode(v => !v)}
+                style={{
+                  padding: "0 10px",
+                  fontSize: 11,
+                  borderRadius: 6,
+                  border: `1px solid ${agentMode ? "#06b6d4" : "rgba(255,255,255,0.15)"}`,
+                  background: agentMode ? "rgba(6,182,212,0.15)" : "transparent",
+                  color: agentMode ? "#06b6d4" : "rgba(255,255,255,0.5)",
+                  cursor: "pointer",
+                  whiteSpace: "nowrap",
+                  fontFamily: "var(--mono)",
+                }}
+              >
+                {agentMode ? "⚡ Agentic" : "◇ Standard"}
+              </button>
+              <button
                 onClick={() => setShowRagDebug(v => !v)}
                 style={{
                   background: "rgba(148,163,184,0.12)",
@@ -271,6 +298,25 @@ export default function StockPanel({ ticker, overview }: Props) {
                 {showRagDebug ? "Hide dbg" : "Show dbg"}
               </button>
             </div>
+
+            {/* Agent step chips */}
+            {agentSteps.length > 0 && (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
+                {agentSteps.map((step, i) => (
+                  <span key={i} style={{
+                    fontSize: 10,
+                    padding: "2px 8px",
+                    borderRadius: 999,
+                    background: "rgba(6,182,212,0.1)",
+                    border: "1px solid rgba(6,182,212,0.3)",
+                    color: "#67e8f9",
+                    fontFamily: "var(--mono)",
+                  }}>
+                    {step}
+                  </span>
+                ))}
+              </div>
+            )}
 
             {/* Thinking indicator — shows between click and first token */}
             {ragLoading && !ragAnswer && (

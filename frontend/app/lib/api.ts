@@ -22,6 +22,57 @@ export const addToWatchlist      = (ticker: string): Promise<{ ticker: string; s
 export const removeFromWatchlist = (ticker: string): Promise<{ ticker: string; status: string }> =>
   api.delete(`/watchlist/${ticker.toUpperCase()}`).then(r => r.data);
 
+export async function* streamAgentQuery(
+  question: string,
+  ticker?: string
+): AsyncGenerator<string> {
+  const resp = await fetch(`${BASE}/rag/agent_query`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "text/event-stream",
+      "ngrok-skip-browser-warning": "1",
+    },
+    body: JSON.stringify({ q: question, ticker }),
+  });
+
+  if (!resp.ok) throw new Error(`Agent RAG request failed (${resp.status})`);
+  if (!resp.body) throw new Error("Agent RAG stream unavailable");
+
+  const reader = resp.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) {
+      buffer += decoder.decode();
+    } else {
+      buffer += decoder.decode(value, { stream: true });
+    }
+
+    const parts = buffer.split(/\r?\n\r?\n/);
+    if (!done) {
+      buffer = parts.pop() ?? "";
+    } else {
+      buffer = "";
+    }
+
+    for (const rawEvent of parts) {
+      const dataLines = rawEvent.split(/\r?\n/).filter(l => l.startsWith("data:"));
+      if (!dataLines.length) continue;
+      const payload = dataLines
+        .map(l => { const v = l.slice(5); return v.startsWith(" ") ? v.slice(1) : v; })
+        .join("\n");
+      if (payload === "[DONE]") return;
+      if (payload.startsWith("[ERROR]")) throw new Error(payload.slice(7).trim());
+      if (payload) yield payload;
+    }
+
+    if (done) return;
+  }
+}
+
 export async function* streamRagQuery(question: string, ticker?: string): AsyncGenerator<string> {
   const resp = await fetch(`${BASE}/rag/query`, {
     method: "POST",
