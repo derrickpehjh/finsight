@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useStockDetail } from "@/app/hooks/useStockDetail";
 import { useTickerNews } from "@/app/hooks/useTickerNews";
 import { streamRagQuery } from "@/app/lib/api";
@@ -21,7 +21,10 @@ export default function StockPanel({ ticker, overview }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>("Summary");
   const [ragAnswer, setRagAnswer] = useState("");
   const [ragLoading, setRagLoading] = useState(false);
+  const [ragError, setRagError] = useState<string | null>(null);
   const [ragQuery, setRagQuery] = useState("");
+  const ragBufferRef = useRef("");
+  const ragFlushRafRef = useRef<number | null>(null);
 
   if (!ticker || !overview) {
     return (
@@ -50,11 +53,39 @@ export default function StockPanel({ ticker, overview }: Props) {
     if (!ragQuery.trim() || ragLoading) return;
     setRagLoading(true);
     setRagAnswer("");
+    setRagError(null);
+    ragBufferRef.current = "";
+
+    const flushRagBuffer = () => {
+      if (!ragBufferRef.current) return;
+      const pending = ragBufferRef.current;
+      ragBufferRef.current = "";
+      setRagAnswer(prev => prev + pending);
+    };
+
+    const scheduleFlush = () => {
+      if (ragFlushRafRef.current !== null) return;
+      ragFlushRafRef.current = window.requestAnimationFrame(() => {
+        ragFlushRafRef.current = null;
+        flushRagBuffer();
+      });
+    };
+
     try {
       for await (const chunk of streamRagQuery(ragQuery, ticker ?? undefined)) {
-        setRagAnswer(prev => prev + chunk);
+        ragBufferRef.current += chunk;
+        scheduleFlush();
       }
+      flushRagBuffer();
+    } catch (err) {
+      flushRagBuffer();
+      const message = err instanceof Error ? err.message : "Unable to get AI response right now.";
+      setRagError(message);
     } finally {
+      if (ragFlushRafRef.current !== null) {
+        window.cancelAnimationFrame(ragFlushRafRef.current);
+        ragFlushRafRef.current = null;
+      }
       setRagLoading(false);
     }
   }
@@ -247,6 +278,16 @@ export default function StockPanel({ ticker, overview }: Props) {
                     .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
                     + (ragLoading ? '<span style="display:inline-block;width:2px;height:1em;background:#06b6d4;margin-left:2px;vertical-align:middle;animation:pulse 0.8s ease-in-out infinite;">&#8203;</span>' : "")
                 }}/>
+              </div>
+            )}
+
+            {ragError && !ragAnswer && (
+              <div className="ai-card" style={{ borderColor: "rgba(251,113,133,0.45)" }}>
+                <div className="ai-hdr">
+                  <div className="ai-tag">◈ RAG Analysis</div>
+                  <div className="ai-model" style={{ color: "#fb7185" }}>error</div>
+                </div>
+                <div className="ai-txt" style={{ color: "#fecdd3" }}>{ragError}</div>
               </div>
             )}
           </>

@@ -25,7 +25,10 @@ export const removeFromWatchlist = (ticker: string): Promise<{ ticker: string; s
 export async function* streamRagQuery(question: string, ticker?: string): AsyncGenerator<string> {
   const resp = await fetch(`${BASE}/rag/query`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "text/event-stream",
+    },
     body: JSON.stringify({ q: question, ticker }),
   });
 
@@ -38,6 +41,19 @@ export async function* streamRagQuery(question: string, ticker?: string): AsyncG
 
   const reader = resp.body.getReader();
   const decoder = new TextDecoder();
+  const isEventStream = (resp.headers.get("content-type") ?? "").includes("text/event-stream");
+
+  // Some proxies can buffer/transform SSE responses. Fall back to plain text
+  // streaming so users still see an answer instead of a blank panel.
+  if (!isEventStream) {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) return;
+      const chunk = decoder.decode(value, { stream: true });
+      if (chunk) yield chunk;
+    }
+  }
+
   let buffer = "";
 
   const parseEvent = (rawEvent: string): string | null => {
