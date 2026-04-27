@@ -28,24 +28,62 @@ export async function* streamRagQuery(question: string, ticker?: string): AsyncG
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ q: question, ticker }),
   });
-  const reader = resp.body!.getReader();
+
+  if (!resp.ok) {
+    throw new Error(`RAG request failed (${resp.status})`);
+  }
+  if (!resp.body) {
+    throw new Error("RAG stream unavailable: empty response body");
+  }
+
+  const reader = resp.body.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
 
+  const parseEvent = (rawEvent: string): string | null => {
+    const dataLines = rawEvent
+      .split(/\r?\n/)
+      .filter(line => line.startsWith("data:"));
+
+    if (!dataLines.length) return null;
+
+    const payload = dataLines
+      .map(line => {
+        const value = line.slice(5);
+        return value.startsWith(" ") ? value.slice(1) : value;
+      })
+      .join("\n");
+
+    if (payload === "[DONE]") return "[DONE]";
+    if (payload.startsWith("[ERROR]")) {
+      throw new Error(payload.slice(7).trim() || "RAG streaming error");
+    }
+    return payload;
+  };
+
   while (true) {
     const { done, value } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split("\n\n");
-    buffer = lines.pop() ?? "";
-    for (const line of lines) {
-      if (line.startsWith("data: ")) {
-        // slice(6) removes "data: " prefix; trimEnd removes trailing CR/LF but
-        // NOT leading spaces — leading spaces are word-separator tokens from Ollama
-        const payload = line.slice(6).trimEnd();
-        if (payload === "[DONE]" || payload.startsWith("[ERROR]")) return;
+    if (done) {
+      buffer += decoder.decode();
+    } else {
+      buffer += decoder.decode(value, { stream: true });
+    }
+
+    const parts = buffer.split(/\r?\n\r?\n/);
+    if (!done) {
+      buffer = parts.pop() ?? "";
+    } else {
+      buffer = "";
+    }
+
+    for (const rawEvent of parts) {
+      const payload = parseEvent(rawEvent);
+      if (payload === "[DONE]") return;
+      if (payload) {
         yield payload;
       }
     }
+
+    if (done) return;
   }
 }

@@ -30,6 +30,14 @@ interface Node {
 
 interface Edge { i: number; j: number; weight: number; }
 interface Transform { scale: number; tx: number; ty: number; }
+interface DragState {
+  active: boolean;
+  mode: "pan" | "node";
+  nodeIndex: number;
+  lastX: number;
+  lastY: number;
+  moved: boolean;
+}
 
 // ── Sector config ──────────────────────────────────────────────────────────────
 // Each sector gets a fixed centroid (fraction of W, H) and a color ring
@@ -106,7 +114,14 @@ const NetworkView = forwardRef<NetworkViewHandle, Props>(function NetworkView(
   const selectedRef  = useRef(selectedTicker);
   const initRef      = useRef(false);
   const transformRef = useRef<Transform>({ scale: 1, tx: 0, ty: 0 });
-  const dragRef      = useRef({ active: false, lastX: 0, lastY: 0 });
+  const dragRef      = useRef<DragState>({
+    active: false,
+    mode: "pan",
+    nodeIndex: -1,
+    lastX: 0,
+    lastY: 0,
+    moved: false,
+  });
 
   stocksRef.current  = stocks;
   selectedRef.current = selectedTicker;
@@ -369,30 +384,92 @@ const NetworkView = forwardRef<NetworkViewHandle, Props>(function NetworkView(
     applyZoom(e.deltaY < 0 ? 1.12 : 1 / 1.12, e.clientX - rect.left, e.clientY - rect.top);
   }, [applyZoom]);
 
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    dragRef.current = { active: true, lastX: e.clientX, lastY: e.clientY };
-  }, []);
-
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!dragRef.current.active) return;
-    transformRef.current.tx += e.clientX - dragRef.current.lastX;
-    transformRef.current.ty += e.clientY - dragRef.current.lastY;
-    dragRef.current.lastX = e.clientX;
-    dragRef.current.lastY = e.clientY;
-  }, []);
-
-  const handleMouseUp = useCallback(() => { dragRef.current.active = false; }, []);
-
-  const handleClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (Math.abs(e.movementX) > 3 || Math.abs(e.movementY) > 3) return;
+  const getWorldPoint = useCallback((clientX: number, clientY: number) => {
     const rect = canvasRef.current!.getBoundingClientRect();
     const { scale, tx, ty } = transformRef.current;
-    const mx = (e.clientX - rect.left - tx) / scale;
-    const my = (e.clientY - rect.top  - ty) / scale;
-    for (const n of nodesRef.current) {
-      if (Math.hypot(mx - n.x, my - n.y) <= n.r + 4) { onSelect(n.ticker); return; }
+    return {
+      x: (clientX - rect.left - tx) / scale,
+      y: (clientY - rect.top - ty) / scale,
+    };
+  }, []);
+
+  const findNodeIndexAt = useCallback((x: number, y: number) => {
+    const nodes = nodesRef.current;
+    for (let i = nodes.length - 1; i >= 0; i--) {
+      const n = nodes[i];
+      if (Math.hypot(x - n.x, y - n.y) <= n.r + 4) return i;
     }
-  }, [onSelect]);
+    return -1;
+  }, []);
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    const p = getWorldPoint(e.clientX, e.clientY);
+    const nodeIndex = findNodeIndexAt(p.x, p.y);
+    if (nodeIndex >= 0) {
+      const n = nodesRef.current[nodeIndex];
+      onSelect(n.ticker);
+      dragRef.current = {
+        active: true,
+        mode: "node",
+        nodeIndex,
+        lastX: e.clientX,
+        lastY: e.clientY,
+        moved: false,
+      };
+      return;
+    }
+
+    dragRef.current = {
+      active: true,
+      mode: "pan",
+      nodeIndex: -1,
+      lastX: e.clientX,
+      lastY: e.clientY,
+      moved: false,
+    };
+  }, [findNodeIndexAt, getWorldPoint, onSelect]);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    const drag = dragRef.current;
+    if (!drag.active) return;
+
+    const dx = e.clientX - drag.lastX;
+    const dy = e.clientY - drag.lastY;
+    if (Math.abs(dx) + Math.abs(dy) > 1) drag.moved = true;
+
+    if (drag.mode === "pan") {
+      transformRef.current.tx += dx;
+      transformRef.current.ty += dy;
+      drag.lastX = e.clientX;
+      drag.lastY = e.clientY;
+      return;
+    }
+
+    const node = nodesRef.current[drag.nodeIndex];
+    if (!node) return;
+    const p = getWorldPoint(e.clientX, e.clientY);
+    node.x = p.x;
+    node.y = p.y;
+    node.vx = 0;
+    node.vy = 0;
+    drag.lastX = e.clientX;
+    drag.lastY = e.clientY;
+  }, [getWorldPoint]);
+
+  const handleMouseUp = useCallback(() => {
+    dragRef.current.active = false;
+    dragRef.current.nodeIndex = -1;
+  }, []);
+
+  const handleClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (dragRef.current.moved || Math.abs(e.movementX) > 3 || Math.abs(e.movementY) > 3) {
+      dragRef.current.moved = false;
+      return;
+    }
+    const p = getWorldPoint(e.clientX, e.clientY);
+    const idx = findNodeIndexAt(p.x, p.y);
+    if (idx >= 0) onSelect(nodesRef.current[idx].ticker);
+  }, [findNodeIndexAt, getWorldPoint, onSelect]);
 
   return (
     <canvas
