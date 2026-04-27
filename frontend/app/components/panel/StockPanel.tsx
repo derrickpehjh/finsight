@@ -1,10 +1,58 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useStockDetail } from "@/app/hooks/useStockDetail";
 import { useTickerNews } from "@/app/hooks/useTickerNews";
 import { streamRagQuery, streamAgentQuery } from "@/app/lib/api";
 import type { StockOverview } from "@/app/lib/types";
+
+function formatRag(text: string): string {
+  const lines = text.split("\n");
+  const out: string[] = [];
+  let inList = false;
+
+  for (const raw of lines) {
+    const line = raw
+      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+      .replace(/\*(.*?)\*/g, "<em>$1</em>");
+
+    // Section headers: ### or ## or lines ending with a colon that are short
+    if (/^#{1,3}\s/.test(raw)) {
+      if (inList) { out.push("</ul>"); inList = false; }
+      out.push(`<p style="margin:10px 0 4px;font-weight:600;color:#e2e8f0;font-size:12px;letter-spacing:0.04em;text-transform:uppercase;">${line.replace(/^#{1,3}\s/, "")}</p>`);
+      continue;
+    }
+
+    // Bullet points: - or * or • at line start
+    if (/^[-*•]\s/.test(raw)) {
+      if (!inList) { out.push('<ul style="margin:6px 0;padding-left:16px;list-style:none;">'); inList = true; }
+      out.push(`<li style="position:relative;padding-left:12px;margin:3px 0;line-height:1.5;"><span style="position:absolute;left:0;color:#06b6d4;">›</span>${line.replace(/^[-*•]\s/, "")}</li>`);
+      continue;
+    }
+
+    // Numbered list: 1. 2. etc
+    if (/^\d+\.\s/.test(raw)) {
+      if (!inList) { out.push('<ul style="margin:6px 0;padding-left:16px;list-style:none;">'); inList = true; }
+      const num = raw.match(/^(\d+)\./)?.[1] ?? "";
+      out.push(`<li style="position:relative;padding-left:20px;margin:3px 0;line-height:1.5;"><span style="position:absolute;left:0;color:#06b6d4;font-weight:600;">${num}.</span>${line.replace(/^\d+\.\s/, "")}</li>`);
+      continue;
+    }
+
+    if (inList) { out.push("</ul>"); inList = false; }
+
+    // Blank line → spacing
+    if (line.trim() === "") {
+      out.push('<div style="height:6px;"/>');
+      continue;
+    }
+
+    out.push(`<p style="margin:0 0 5px;line-height:1.6;">${line}</p>`);
+  }
+
+  if (inList) out.push("</ul>");
+  return out.join("");
+}
+
 
 interface Props {
   ticker: string | null;
@@ -16,9 +64,16 @@ type Tab = typeof TABS[number];
 
 export default function StockPanel({ ticker, overview }: Props) {
   const { detail } = useStockDetail(ticker);
-  // Dedicated news fetch — independent of the detail endpoint so Summary is always populated
   const { articles: allArticles, isLoading: newsLoading } = useTickerNews(ticker);
   const [activeTab, setActiveTab] = useState<Tab>("Summary");
+
+  // Summary-tab auto-analysis
+  const [summaryAnswer, setSummaryAnswer] = useState("");
+  const [summaryLoading, setSummaryLoading] = useState(false);
+  const summaryBufferRef = useRef("");
+  const summaryRafRef = useRef<number | null>(null);
+
+  // Analyst-tab interactive RAG
   const [ragAnswer, setRagAnswer] = useState("");
   const [ragLoading, setRagLoading] = useState(false);
   const [ragError, setRagError] = useState<string | null>(null);
@@ -35,6 +90,54 @@ export default function StockPanel({ ticker, overview }: Props) {
   });
   const ragBufferRef = useRef("");
   const ragFlushRafRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!ticker) return;
+    setSummaryAnswer("");
+    setSummaryLoading(true);
+    summaryBufferRef.current = "";
+
+    const flush = () => {
+      if (!summaryBufferRef.current) return;
+      const t = summaryBufferRef.current;
+      summaryBufferRef.current = "";
+      setSummaryAnswer(prev => prev + t);
+    };
+
+    let cancelled = false;
+    (async () => {
+      try {
+        for await (const chunk of streamRagQuery(
+          `In 3-4 sentences, give a concise bull/bear analysis of ${ticker} based on recent news and sentiment. Mention the key catalyst and main risk.`,
+          ticker
+        )) {
+          if (cancelled) break;
+          summaryBufferRef.current += chunk;
+          if (summaryRafRef.current === null) {
+            summaryRafRef.current = window.requestAnimationFrame(() => {
+              summaryRafRef.current = null;
+              flush();
+            });
+          }
+        }
+        flush();
+      } catch {
+        // silent — summary is best-effort
+      } finally {
+        if (!cancelled) setSummaryLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      if (summaryRafRef.current !== null) {
+        window.cancelAnimationFrame(summaryRafRef.current);
+        summaryRafRef.current = null;
+      }
+      setSummaryLoading(false);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ticker]);
 
   if (!ticker || !overview) {
     return (
@@ -59,8 +162,8 @@ export default function StockPanel({ ticker, overview }: Props) {
   const newsArticles = allArticles.filter(a => !a.source?.startsWith("reddit"));
   const redditPosts  = allArticles.filter(a =>  a.source?.startsWith("reddit"));
 
-  async function runRag() {
-    if (!ragQuery.trim() || ragLoading) return;
+  async function executeRag(q: string, useAgent = false) {
+    if (!q.trim() || ragLoading) return;
     setRagLoading(true);
     setRagAnswer("");
     setRagError(null);
@@ -84,9 +187,9 @@ export default function StockPanel({ ticker, overview }: Props) {
     };
 
     try {
-      const stream = agentMode
-        ? streamAgentQuery(ragQuery, ticker ?? undefined)
-        : streamRagQuery(ragQuery, ticker ?? undefined);
+      const stream = useAgent
+        ? streamAgentQuery(q, ticker ?? undefined)
+        : streamRagQuery(q, ticker ?? undefined);
       for await (const chunk of stream) {
         if (chunk.startsWith("__STEP__")) {
           const detail = chunk.slice(chunk.indexOf("|") + 1).replace(/\n/g, "").trim();
@@ -116,6 +219,10 @@ export default function StockPanel({ ticker, overview }: Props) {
       }
       setRagLoading(false);
     }
+  }
+
+  function runRag() {
+    executeRag(ragQuery, agentMode);
   }
 
   const capStr = overview.market_cap >= 1e12
@@ -216,6 +323,36 @@ export default function StockPanel({ ticker, overview }: Props) {
                 </div>
               </div>
             ))}
+
+            {/* AI snapshot */}
+            <div className="slbl" style={{ marginTop: 12 }}>AI Snapshot</div>
+            <div className="ai-card">
+              <div className="ai-beam" style={summaryLoading ? { animation: "pulse 1.5s ease-in-out infinite" } : undefined}/>
+              <div className="ai-hdr">
+                <div className="ai-tag">◈ Quick Analysis</div>
+                <div className="ai-model" style={{ color: summaryLoading ? "#06b6d4" : undefined }}>
+                  {summaryLoading ? "analysing…" : "llama3.1:8b"}
+                </div>
+              </div>
+              {summaryLoading && !summaryAnswer && (
+                <div style={{ display: "flex", gap: 5, padding: "6px 0" }}>
+                  {[0, 0.3, 0.6].map((delay, i) => (
+                    <div key={i} style={{
+                      width: 6, height: 6, borderRadius: "50%",
+                      background: "#06b6d4",
+                      animation: `pulse 1s ease-in-out ${delay}s infinite`,
+                      opacity: 0.8,
+                    }}/>
+                  ))}
+                </div>
+              )}
+              {summaryAnswer && (
+                <div className="ai-txt" style={{ fontSize: 12, lineHeight: 1.6 }} dangerouslySetInnerHTML={{
+                  __html: formatRag(summaryAnswer)
+                    + (summaryLoading ? '<span style="display:inline-block;width:2px;height:1em;background:#06b6d4;margin-left:2px;vertical-align:middle;animation:pulse 0.8s ease-in-out infinite;">&#8203;</span>' : "")
+                }}/>
+              )}
+            </div>
           </>
         )}
 
@@ -351,9 +488,8 @@ export default function StockPanel({ ticker, overview }: Props) {
                     {ragLoading ? "streaming…" : "llama3.1:8b"}
                   </div>
                 </div>
-                <div className="ai-txt" dangerouslySetInnerHTML={{
-                  __html: ragAnswer
-                    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+                <div className="ai-txt" style={{ fontSize: 12, lineHeight: 1.6 }} dangerouslySetInnerHTML={{
+                  __html: formatRag(ragAnswer)
                     + (ragLoading ? '<span style="display:inline-block;width:2px;height:1em;background:#06b6d4;margin-left:2px;vertical-align:middle;animation:pulse 0.8s ease-in-out infinite;">&#8203;</span>' : "")
                 }}/>
               </div>
