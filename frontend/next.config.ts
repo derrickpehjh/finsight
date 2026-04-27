@@ -16,7 +16,6 @@ const nextConfig: NextConfig = {
     return [
       { source: "/stocks/:path*",    destination: `${backend}/stocks/:path*` },
       { source: "/news/:path*",      destination: `${backend}/news/:path*` },
-      { source: "/rag/:path*",       destination: `${backend}/rag/:path*` },
       { source: "/watchlist/:path*", destination: `${backend}/watchlist/:path*` },
       { source: "/health",           destination: `${backend}/health` },
     ];
