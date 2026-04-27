@@ -23,6 +23,14 @@ export default function StockPanel({ ticker, overview }: Props) {
   const [ragLoading, setRagLoading] = useState(false);
   const [ragError, setRagError] = useState<string | null>(null);
   const [ragQuery, setRagQuery] = useState("");
+  const [showRagDebug, setShowRagDebug] = useState(false);
+  const [ragDebug, setRagDebug] = useState({
+    chunks: 0,
+    chars: 0,
+    lastChunk: "",
+    ended: false,
+    error: "",
+  });
   const ragBufferRef = useRef("");
   const ragFlushRafRef = useRef<number | null>(null);
 
@@ -54,6 +62,7 @@ export default function StockPanel({ ticker, overview }: Props) {
     setRagLoading(true);
     setRagAnswer("");
     setRagError(null);
+    setRagDebug({ chunks: 0, chars: 0, lastChunk: "", ended: false, error: "" });
     ragBufferRef.current = "";
 
     const flushRagBuffer = () => {
@@ -74,13 +83,21 @@ export default function StockPanel({ ticker, overview }: Props) {
     try {
       for await (const chunk of streamRagQuery(ragQuery, ticker ?? undefined)) {
         ragBufferRef.current += chunk;
+        setRagDebug(prev => ({
+          ...prev,
+          chunks: prev.chunks + 1,
+          chars: prev.chars + chunk.length,
+          lastChunk: chunk.slice(0, 80),
+        }));
         scheduleFlush();
       }
       flushRagBuffer();
+      setRagDebug(prev => ({ ...prev, ended: true }));
     } catch (err) {
       flushRagBuffer();
       const message = err instanceof Error ? err.message : "Unable to get AI response right now.";
       setRagError(message);
+      setRagDebug(prev => ({ ...prev, error: message, ended: true }));
     } finally {
       if (ragFlushRafRef.current !== null) {
         window.cancelAnimationFrame(ragFlushRafRef.current);
@@ -238,6 +255,21 @@ export default function StockPanel({ ticker, overview }: Props) {
               >
                 {ragLoading ? "⏳" : "Ask"}
               </button>
+              <button
+                onClick={() => setShowRagDebug(v => !v)}
+                style={{
+                  background: "rgba(148,163,184,0.12)",
+                  border: "1px solid rgba(148,163,184,0.35)",
+                  borderRadius: 6,
+                  padding: "0 10px",
+                  color: "#94a3b8",
+                  fontFamily: "var(--mono)",
+                  fontSize: 11,
+                  cursor: "pointer",
+                }}
+              >
+                {showRagDebug ? "Hide dbg" : "Show dbg"}
+              </button>
             </div>
 
             {/* Thinking indicator — shows between click and first token */}
@@ -288,6 +320,20 @@ export default function StockPanel({ ticker, overview }: Props) {
                   <div className="ai-model" style={{ color: "#fb7185" }}>error</div>
                 </div>
                 <div className="ai-txt" style={{ color: "#fecdd3" }}>{ragError}</div>
+              </div>
+            )}
+
+            {showRagDebug && (
+              <div className="ai-card" style={{ borderColor: "rgba(148,163,184,0.35)" }}>
+                <div className="ai-hdr">
+                  <div className="ai-tag">◈ Stream Debug</div>
+                  <div className="ai-model" style={{ color: "#94a3b8" }}>
+                    {ragLoading ? "running" : ragDebug.ended ? "ended" : "idle"}
+                  </div>
+                </div>
+                <div className="ai-txt" style={{ fontFamily: "var(--mono)", fontSize: 11, whiteSpace: "pre-wrap" }}>
+                  {`chunks=${ragDebug.chunks}\nchars=${ragDebug.chars}\nlastChunk=${ragDebug.lastChunk || "<none>"}\nerror=${ragDebug.error || "<none>"}`}
+                </div>
               </div>
             )}
           </>

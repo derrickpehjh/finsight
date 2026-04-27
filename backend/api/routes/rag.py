@@ -16,6 +16,39 @@ class QueryRequest(BaseModel):
     ticker: str | None = None
 
 
+async def _build_direct_context(db: asyncpg.Pool, ticker: str | None) -> str:
+    if not ticker:
+        return ""
+
+    try:
+        rows = await db.fetch("""
+            SELECT headline, body, source, published_at
+            FROM articles
+            WHERE $1 = ANY(ticker)
+            ORDER BY published_at DESC
+            LIMIT 8
+        """, ticker.upper())
+
+        if rows:
+            parts = []
+            for r in rows:
+                date = r["published_at"].strftime("%Y-%m-%d") if r["published_at"] else ""
+                body_snippet = (r["body"] or "").strip()[:300]
+                parts.append(
+                    f"Source: {r['source']} ({date})\n"
+                    f"Headline: {r['headline']}\n"
+                    + (f"Summary: {body_snippet}" if body_snippet else "")
+                )
+            logger.info(f"RAG: injecting {len(rows)} Postgres articles for {ticker}")
+            return "\n\n---\n\n".join(parts)
+
+        logger.info(f"RAG: no Postgres articles found for {ticker} — using Qdrant only")
+    except Exception as e:
+        logger.warning(f"RAG: failed to fetch Postgres context for {ticker}: {e}")
+
+    return ""
+
+
 @router.post("/query")
 async def rag_query(req: QueryRequest, db: asyncpg.Pool = Depends(get_db)):
     """
@@ -31,33 +64,7 @@ async def rag_query(req: QueryRequest, db: asyncpg.Pool = Depends(get_db)):
       ...
       data: [DONE]\\n\\n
     """
-    direct_context = ""
-    if req.ticker:
-        try:
-            rows = await db.fetch("""
-                SELECT headline, body, source, published_at
-                FROM articles
-                WHERE $1 = ANY(ticker)
-                ORDER BY published_at DESC
-                LIMIT 8
-            """, req.ticker.upper())
-
-            if rows:
-                parts = []
-                for r in rows:
-                    date = r["published_at"].strftime("%Y-%m-%d") if r["published_at"] else ""
-                    body_snippet = (r["body"] or "").strip()[:300]
-                    parts.append(
-                        f"Source: {r['source']} ({date})\n"
-                        f"Headline: {r['headline']}\n"
-                        + (f"Summary: {body_snippet}" if body_snippet else "")
-                    )
-                direct_context = "\n\n---\n\n".join(parts)
-                logger.info(f"RAG: injecting {len(rows)} Postgres articles for {req.ticker}")
-            else:
-                logger.info(f"RAG: no Postgres articles found for {req.ticker} — using Qdrant only")
-        except Exception as e:
-            logger.warning(f"RAG: failed to fetch Postgres context for {req.ticker}: {e}")
+    direct_context = await _build_direct_context(db, req.ticker)
 
     async def event_stream():
         try:
@@ -79,3 +86,19 @@ async def rag_query(req: QueryRequest, db: asyncpg.Pool = Depends(get_db)):
             "X-Accel-Buffering": "no",   # disable nginx buffering
         },
     )
+
+
+@router.post("/query_once")
+async def rag_query_once(req: QueryRequest, db: asyncpg.Pool = Depends(get_db)):
+    """Return a single non-stream RAG answer for clients when SSE is unavailable."""
+    direct_context = await _build_direct_context(db, req.ticker)
+
+    chunks: list[str] = []
+    async for chunk in query_rag(req.q, req.ticker, direct_context):
+        chunks.append(chunk)
+
+    answer = "".join(chunks).strip()
+    if not answer:
+        answer = "Unable to generate analysis right now. Please try again."
+
+    return {"answer": answer}

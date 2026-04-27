@@ -28,6 +28,7 @@ export async function* streamRagQuery(question: string, ticker?: string): AsyncG
     headers: {
       "Content-Type": "application/json",
       Accept: "text/event-stream",
+      "ngrok-skip-browser-warning": "1",
     },
     body: JSON.stringify({ q: question, ticker }),
   });

@@ -103,8 +103,19 @@ async def query_rag(
 
     try:
         response = query_engine.query(full_question)
+        emitted = False
         for token in response.response_gen:
+            emitted = True
             yield token
+
+        # Some providers/proxy paths can occasionally complete the stream with
+        # no token events. Fall back to the final response text when available.
+        if not emitted:
+            fallback = (getattr(response, "response", "") or "").strip()
+            if fallback:
+                yield fallback
+            else:
+                yield "Unable to generate analysis right now. Please try again."
     except Exception as e:
         logger.error(f"RAG query error for '{question}' (ticker={ticker}): {e}")
         yield f"Unable to generate analysis: {str(e)}"
