@@ -6,50 +6,85 @@ import { useTickerNews } from "@/app/hooks/useTickerNews";
 import { streamRagQuery, streamAgentQuery } from "@/app/lib/api";
 import type { StockOverview } from "@/app/lib/types";
 
+const LI = (content: string) =>
+  `<li style="position:relative;padding-left:14px;margin:4px 0;line-height:1.6;"><span style="position:absolute;left:0;color:#06b6d4;">›</span>${content}</li>`;
+
+const HEADER = (content: string) =>
+  `<p style="margin:12px 0 5px;font-weight:600;color:#e2e8f0;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;">${content}</p>`;
+
+function splitSentences(text: string): string[] {
+  // Split on sentence-ending punctuation followed by whitespace + capital letter.
+  // Avoids splitting on common abbreviations (single caps like "U.S.") by requiring
+  // the preceding word to be more than one character.
+  return text
+    .split(/(?<=\w{2,}[.!?])\s+(?=[A-Z"'])/g)
+    .map(s => s.trim())
+    .filter(s => s.length > 8);
+}
+
+function applyInline(raw: string): string {
+  return raw
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.*?)\*/g, "<em>$1</em>");
+}
+
 function formatRag(text: string): string {
   const lines = text.split("\n");
   const out: string[] = [];
   let inList = false;
 
+  const closeList = () => { if (inList) { out.push("</ul>"); inList = false; } };
+  const openList  = () => { if (!inList) { out.push('<ul style="margin:5px 0 8px;padding-left:4px;list-style:none;">'); inList = true; } };
+
   for (const raw of lines) {
-    const line = raw
-      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-      .replace(/\*(.*?)\*/g, "<em>$1</em>");
+    const line = applyInline(raw);
 
-    // Section headers: ### or ## or lines ending with a colon that are short
-    if (/^#{1,3}\s/.test(raw)) {
-      if (inList) { out.push("</ul>"); inList = false; }
-      out.push(`<p style="margin:10px 0 4px;font-weight:600;color:#e2e8f0;font-size:12px;letter-spacing:0.04em;text-transform:uppercase;">${line.replace(/^#{1,3}\s/, "")}</p>`);
-      continue;
-    }
-
-    // Bullet points: - or * or • at line start
-    if (/^[-*•]\s/.test(raw)) {
-      if (!inList) { out.push('<ul style="margin:6px 0;padding-left:16px;list-style:none;">'); inList = true; }
-      out.push(`<li style="position:relative;padding-left:12px;margin:3px 0;line-height:1.5;"><span style="position:absolute;left:0;color:#06b6d4;">›</span>${line.replace(/^[-*•]\s/, "")}</li>`);
-      continue;
-    }
-
-    // Numbered list: 1. 2. etc
-    if (/^\d+\.\s/.test(raw)) {
-      if (!inList) { out.push('<ul style="margin:6px 0;padding-left:16px;list-style:none;">'); inList = true; }
-      const num = raw.match(/^(\d+)\./)?.[1] ?? "";
-      out.push(`<li style="position:relative;padding-left:20px;margin:3px 0;line-height:1.5;"><span style="position:absolute;left:0;color:#06b6d4;font-weight:600;">${num}.</span>${line.replace(/^\d+\.\s/, "")}</li>`);
-      continue;
-    }
-
-    if (inList) { out.push("</ul>"); inList = false; }
-
-    // Blank line → spacing
     if (line.trim() === "") {
-      out.push('<div style="height:6px;"/>');
+      closeList();
+      out.push('<div style="height:4px;"/>');
       continue;
     }
 
-    out.push(`<p style="margin:0 0 5px;line-height:1.6;">${line}</p>`);
+    // Section headers: ###, ##, # or **Short Label:**
+    if (/^#{1,3}\s/.test(raw)) {
+      closeList();
+      out.push(HEADER(line.replace(/^#{1,3}\s/, "")));
+      continue;
+    }
+    if (/^\*\*[^*]{2,40}:\*\*$/.test(raw.trim())) {
+      closeList();
+      out.push(HEADER(line.replace(/^\*\*/, "").replace(/\*\*$/, "")));
+      continue;
+    }
+
+    // Existing bullet points
+    if (/^[-*•]\s/.test(raw)) {
+      openList();
+      out.push(LI(line.replace(/^[-*•]\s/, "")));
+      continue;
+    }
+
+    // Numbered list
+    if (/^\d+\.\s/.test(raw)) {
+      openList();
+      const num = raw.match(/^(\d+)\./)?.[1] ?? "";
+      out.push(LI(`<span style="color:#06b6d4;font-weight:600;margin-right:4px;">${num}.</span>${line.replace(/^\d+\.\s/, "")}`));
+      continue;
+    }
+
+    // Plain paragraph — split into per-sentence bullets
+    closeList();
+    const sentences = splitSentences(raw);
+    if (sentences.length > 1) {
+      openList();
+      for (const s of sentences) out.push(LI(applyInline(s)));
+      closeList();
+    } else {
+      out.push(`<p style="margin:0 0 6px;line-height:1.65;">${line}</p>`);
+    }
   }
 
-  if (inList) out.push("</ul>");
+  closeList();
   return out.join("");
 }
 
