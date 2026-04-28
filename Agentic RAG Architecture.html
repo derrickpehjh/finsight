@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FinSight — Agentic RAG</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Manrope:wght@300;400;500;600&family=Fira+Code:wght@300;400;500&display=swap">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { background: #000; color: #f1f5f9; font-family: 'Manrope', sans-serif; scroll-behavior: smooth; }
+body { min-height: 100vh; }
+
+.page { max-width: 1100px; margin: 0 auto; padding: 48px 32px 80px; }
+
+.header { display: flex; align-items: center; gap: 16px; margin-bottom: 52px; }
+.brand-icon { width: 40px; height: 40px; background: linear-gradient(135deg,#06b6d4,#3b82f6); border-radius: 8px; display:flex; align-items:center; justify-content:center; font-family:'Orbitron',sans-serif; font-size:14px; font-weight:900; color:#000; box-shadow:0 0 20px rgba(6,182,212,0.4); flex-shrink:0; }
+.header-text h1 { font-family:'Orbitron',sans-serif; font-size:20px; font-weight:900; letter-spacing:0.08em; background:linear-gradient(90deg,#fff 60%,#a78bfa); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.header-text p { font-family:'Fira Code',monospace; font-size:11px; color:#475569; letter-spacing:0.06em; margin-top:4px; }
+
+.section-title { font-family:'Fira Code',monospace; font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:#475569; margin-bottom:18px; display:flex; align-items:center; gap:10px; }
+.section-title::after { content:''; flex:1; height:1px; background:rgba(255,255,255,0.05); }
+
+.diagram-wrap { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.07); border-radius:12px; padding:28px 24px; margin-bottom:40px; overflow:hidden; }
+
+.cards-row { display: grid; gap: 14px; margin-bottom: 40px; }
+.cards-row-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+.card { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:10px; padding:18px; }
+.card-label { font-family:'Fira Code',monospace; font-size:9px; letter-spacing:0.12em; text-transform:uppercase; color:#06b6d4; margin-bottom:10px; display:flex; align-items:center; gap:7px; }
+.card-label .dot { width:5px; height:5px; border-radius:50%; background:#06b6d4; box-shadow:0 0 5px #06b6d4; flex-shrink:0; }
+.card p { font-size:12px; color:#94a3b8; line-height:1.6; }
+.card strong { color:#cbd5e1; }
+
+.tech { display:inline-block; font-family:'Fira Code',monospace; font-size:9px; padding:2px 7px; border-radius:3px; margin:2px 2px 2px 0; }
+.badge-cyan  { color:#06b6d4; background:rgba(6,182,212,0.1);  border:1px solid rgba(6,182,212,0.2); }
+.badge-green { color:#34d399; background:rgba(52,211,153,0.1); border:1px solid rgba(52,211,153,0.2); }
+.badge-vio   { color:#a78bfa; background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.2); }
+.badge-amb   { color:#fbbf24; background:rgba(251,191,36,0.1); border:1px solid rgba(251,191,36,0.2); }
+.badge-muted { color:#94a3b8; background:rgba(148,163,184,0.07);border:1px solid rgba(148,163,184,0.15); }
+.badge-red   { color:#f87171; background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.2); }
+
+@media (max-width: 700px) {
+  .cards-row-3 { grid-template-columns: 1fr; }
+  .page { padding: 24px 16px 60px; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="brand-icon">FS</div>
+    <div class="header-text">
+      <h1>AGENTIC RAG ARCHITECTURE</h1>
+      <p>FINSIGHT · RETRIEVE → REFLECT → SYNTHESIZE · v0.2.0</p>
+    </div>
+  </div>
+
+  <!-- ── 01. Full System Architecture ─────────────────────────────────── -->
+  <div class="section-title">01 · Full System Architecture</div>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 1100 430" width="100%" style="display:block;overflow:visible;">
+      <defs>
+        <marker id="arrowCyan"  markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#06b6d4" opacity="0.7"/></marker>
+        <marker id="arrowGreen" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#34d399" opacity="0.7"/></marker>
+        <marker id="arrowVio"   markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#a78bfa" opacity="0.7"/></marker>
+        <marker id="arrowAmb"   markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#fbbf24" opacity="0.7"/></marker>
+        <filter id="glowCyan"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="glowVio"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+
+      <!-- Layer labels -->
+      <text x="20"  y="20" font-family="'Fira Code',monospace" font-size="9" letter-spacing="0.12em" fill="#475569">DATA SOURCES</text>
+      <text x="860" y="72" font-family="'Fira Code',monospace" font-size="9" letter-spacing="0.12em" fill="#475569">STORAGE</text>
+      <text x="20"  y="285" font-family="'Fira Code',monospace" font-size="9" letter-spacing="0.12em" fill="#475569">FRONTEND</text>
+      <text x="630" y="285" font-family="'Fira Code',monospace" font-size="9" letter-spacing="0.12em" fill="#475569">API LAYER</text>
+
+      <!-- Data Sources -->
+      <rect x="20"  y="30" width="120" height="50" rx="7" fill="rgba(6,182,212,0.07)"  stroke="rgba(6,182,212,0.25)"  stroke-width="1"/>
+      <text x="80"  y="51" text-anchor="middle" font-family="'Fira Code',monospace" font-size="10" font-weight="500" fill="#06b6d4">NewsAPI</text>
+      <text x="80"  y="67" text-anchor="middle" font-family="'Fira Code',monospace" font-size="9"  fill="#475569">Reuters · Benzinga</text>
+
+      <rect x="160" y="30" width="120" height="50" rx="7" fill="rgba(251,191,36,0.07)" stroke="rgba(251,191,36,0.25)" stroke-width="1"/>
+      <text x="220" y="51" text-anchor="middle" font-family="'Fira Code',monospace" font-size="10" font-weight="500" fill="#fbbf24">Reddit JSON</text>
+      <text x="220" y="67" text-anchor="middle" font-family="'Fira Code',monospace" font-size="9"  fill="#475569">r/stocks · r/investing</text>
+
+      <rect x="300" y="30" width="120" height="50" rx="7" fill="rgba(52,211,153,0.07)" stroke="rgba(52,211,153,0.25)" stroke-width="1"/>
+      <text x="360" y="51" text-anchor="middle" font-family="'Fira Code',monospace" font-size="10" font-weight="500" fill="#34d399">yfinance</text>
+      <text x="360" y="67" text-anchor="middle" font-family="'Fira Code',monospace" font-size="9"  fill="#475569">Price · Cap · Sector</text>
+
+      <line x1="80"  y1="80" x2="80"  y2="108" stroke="#06b6d4" stroke-width="1" stroke-dasharray="5,3" marker-end="url(#arrowCyan)"  opacity="0.5"><animate attributeName="stroke-dashoffset" from="0" to="-16" dur="1.2s" repeatCount="indefinite"/></line>
+      <line x1="220" y1="80" x2="220" y2="108" stroke="#fbbf24" stroke-width="1" stroke-dasharray="5,3" marker-end="url(#arrowAmb)"   opacity="0.5"><animate attributeName="stroke-dashoffset" from="0" to="-16" dur="1.4s" repeatCount="indefinite"/></line>
+      <line x1="360" y1="80" x2="360" y2="108" stroke="#34d399" stroke-width="1" stroke-dasharray="5,3" marker-end="url(#arrowGreen)" opacity="0.5"><animate attributeName="stroke-dashoffset" from="0" to="-16" dur="1.0s" repeatCount="indefinite"/></line>
+
+      <!-- Ingester -->
+      <g filter="url(#glowCyan)">
+        <rect x="60" y="108" width="340" height="52" rx="8" fill="rgba(6,182,212,0.1)" stroke="rgba(6,182,212,0.4)" stroke-width="1.5"/>
+      </g>
+      <text x="230" y="130" text-anchor="middle" font-family="'Fira Code',monospace" font-size="11" font-weight="500" fill="#06b6d4">Ingester</text>
+      <text x="230" y="148" text-anchor="middle" font-family="'Fira Code',monospace" font-size="9"  fill="#475569">APScheduler · 5-min cycle · feedparser RSS · URL-hash dedup</text>
+
+      <line x1="400" y1="134" x2="470" y2="134" stroke="#fbbf24" stroke-width="1" stroke-dasharray="5,3" marker-end="url(#arrowAmb)" opacity="0.7"><animate attributeName="stroke-dashoffset" from="0" to="-16" dur="0.8s" repeatCount="indefinite"/></line>
+
+      <!-- Redis Queue -->
+      <rect x="470" y="110" width="110" height="48" rx="7" fill="rgba(251,191,36,0.08)" stroke="rgba(251,191,36,0.3)" stroke-width="1"/>
+      <text x="525" y="131" text-anchor="middle" font-family="'Fira Code',monospace" font-size="10" font-weight="500" fill="#fbbf24">Redis</text>
+      <text x="525" y="147" text-anchor="middle" font-family="'Fira Code',monospace" font-size="9"  fill="#475569">Article ID queue</text>
+
+      <line x1="580" y1="134" x2="620" y2="134" stroke="#fbbf24" stroke-width="1" stroke-dasharray="5,3" marker-end="url(#arrowAmb)" opacity="0.7"><animate attributeName="stroke-dashoffset" from="0" to="-16" dur="0.8s" repeatCount="indefinite"/></line>
+
+      <!-- Processing Pipeline -->
+      <rect x="620" y="80" width="200" height="140" rx="9" fill="rgba(167,139,250,0.05)" stroke="rgba(167,139,250,0.2)" stroke-width="1" stroke-dasharray="5,3"/>
+      <text x="720" y="100" text-anchor="middle" font-family="'Fira Code',monospace" font-size="9" letter-spacing="0.12em" fill="#a78bfa">PROCESSING PIPELINE</text>
+      <rect x="634" y="108" width="172" height="30" rx="5" fill="rgba(167,139,250,0.1)" stroke="rgba(167,139,250,0.3)" stroke-width="1"/>
+      <text x="720" y="128" text-anchor="middle" font-family="'Fira Code',monospace" font-size="10" fill="#a78bfa">spaCy NER → Tickers</text>
+      <line x1="720" y1="138" x2="720" y2="150" stroke="#a78bfa" stroke-width="1" opacity="0.4" marker-end="url(#arrowVio)"/>
+      <rect x="634" y="150" width="172" height="30" rx="5" fill="rgba(52,211,153,0.08)" stroke="rgba(52,211,153,0.3)" stroke-width="1"/>
+      <text x="720" y="170" text-anchor="middle" font-family="'Fira Code',monospace" font-size="10" fill="#34d399">FinBERT Sentiment</text>
+      <line x1="720" y1="180" x2="720" y2="193" stroke="#34d399" stroke-width="1" opacity="0.4" marker-end="url(#arrowGreen)"/>
+      <rect x="634" y="193" width="172" height="30" rx="5" fill="rgba(6,182,212,0.08)" stroke="rgba(6,182,212,0.3)" stroke-width="1"/>
+      <text x="720" y="208" text-anchor="middle" font-family="'Fira Code',monospace" font-size="10" fill="#06b6d4">nomic-embed-text</text>
+      <text x="720" y="219" text-anchor="middle" font-family="'Fira Code',monospace" font-size="8"  fill="#475569">chunk=512 · overlap=64</text>
+
+      <!-- Storage -->
+      <rect x="860" y="80"  width="110" height="48" rx="7" fill="rgba(52,211,153,0.07)" stroke="rgba(52,211,153,0.25)" stroke-width="1"/>
+      <text x="915" y="101" text-anchor="middle" font-family="'Fira Code',monospace" font-size="10" font-weight="500" fill="#34d399">PostgreSQL</text>
+      <text x="915" y="117" text-anchor="middle" font-family="'Fira Code',monospace" font-size="9"  fill="#475569">Articles · Sentiment</text>
+
+      <g filter="url(#glowCyan)">
+        <rect x="860" y="143" width="110" height="48" rx="7" fill="rgba(6,182,212,0.1)" stroke="rgba(6,182,212,0.4)" stroke-width="1.5"/>
+      </g>
+      <text x="915" y="164" text-anchor="middle" font-family="'Fira Code',monospace" font-size="10" font-weight="500" fill="#06b6d4">Qdrant</text>
+      <text x="915" y="180" text-anchor="middle" font-family="'Fira Code',monospace" font-size="9"  fill="#475569">768-dim vectors · RAG</text>
+
+      <rect x="860" y="206" width="110" height="48" rx="7" fill="rgba(251,191,36,0.07)" stroke="rgba(251,191,36,0.25)" stroke-width="1"/>
+      <text x="915" y="227" text-anchor="middle" font-family="'Fira Code',monospace" font-size="10" font-weight="500" fill="#fbbf24">Redis Cache</text>
+      <text x="915" y="243" text-anchor="middle" font-family="'Fira Code',monospace" font-size="9"  fill="#475569">TTL 60s · /overview</text>
+
+      <line x1="806" y1="165" x2="858" y2="120" stroke="#34d399" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrowGreen)" opacity="0.4"><animate attributeName="stroke-dashoffset" from="0" to="-14" dur="1s" repeatCount="indefinite"/></line>
+      <line x1="806" y1="208" x2="858" y2="180" stroke="#06b6d4" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrowCyan)"  opacity="0.5"><animate attributeName="stroke-dashoffset" from="0" to="-14" dur="0.9s" repeatCount="indefinite"/></line>
+      <path d="M 400 140 Q 450 70 860 100" stroke="#34d399" stroke-width="1" stroke-dasharray="3,4" fill="none" marker-end="url(#arrowGreen)" opacity="0.2"><animate attributeName="stroke-dashoffset" from="0" to="-14" dur="2s" repeatCount="indefinite"/></path>
+
+      <!-- FastAPI -->
+      <rect x="630" y="295" width="350" height="70" rx="8" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+      <text x="805" y="318" text-anchor="middle" font-family="'Fira Code',monospace" font-size="11" font-weight="500" fill="#f1f5f9">FastAPI Backend  :8000</text>
+      <text x="805" y="334" text-anchor="middle" font-family="'Fira Code',monospace" font-size="9"  fill="#475569">/stocks/overview · /news · /rag/query · /rag/agent_query · /watchlist</text>
+      <text x="805" y="350" text-anchor="middle" font-family="'Fira Code',monospace" font-size="8"  fill="#a78bfa">agentic_rag.py — retrieve → reflect → re-retrieve → synthesize</text>
+
+      <path d="M 915 254 Q 915 280 805 295" stroke="#06b6d4" stroke-width="1.5" stroke-dasharray="5,3" fill="none" marker-end="url(#arrowCyan)"  opacity="0.6"><animate attributeName="stroke-dashoffset" from="0" to="-16" dur="1.0s" repeatCount="indefinite"/></path>
+      <path d="M 860 232 Q 840 270 805 295" stroke="#fbbf24" stroke-width="1"   stroke-dasharray="4,3" fill="none" marker-end="url(#arrowAmb)"   opacity="0.4"><animate attributeName="stroke-dashoffset" from="0" to="-14" dur="1.3s" repeatCount="indefinite"/></path>
+      <path d="M 860 108 Q 840 200 805 295" stroke="#34d399" stroke-width="1"   stroke-dasharray="4,3" fill="none" marker-end="url(#arrowGreen)" opacity="0.3"><animate attributeName="stroke-dashoffset" from="0" to="-14" dur="1.5s" repeatCount="indefinite"/></path>
+
+      <!-- Frontend -->
+      <g filter="url(#glowCyan)">
+        <rect x="60" y="295" width="540" height="70" rx="9" fill="rgba(6,182,212,0.06)" stroke="rgba(6,182,212,0.3)" stroke-width="1.5"/>
+      </g>
+      <text x="330" y="318" text-anchor="middle" font-family="'Fira Code',monospace" font-size="11" font-weight="500" fill="#06b6d4">Next.js Frontend · :3001</text>
+      <text x="330" y="334" text-anchor="middle" font-family="'Fira Code',monospace" font-size="9"  fill="#475569">Scatter Plot · Network Graph · Heatmap · Watchlist Sidebar</text>
+      <text x="330" y="350" text-anchor="middle" font-family="'Fira Code',monospace" font-size="9"  fill="#475569">Stock Panel: Summary · Signal · Analyst (RAG chat · SSE · __STEP__ events)</text>
+
+      <line x1="630" y1="325" x2="600" y2="325" stroke="#06b6d4" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrowCyan)" opacity="0.7"><animate attributeName="stroke-dashoffset" from="0" to="-16" dur="0.9s" repeatCount="indefinite"/></line>
+
+      <!-- Ollama -->
+      <g filter="url(#glowVio)">
+        <rect x="980" y="295" width="110" height="70" rx="8" fill="rgba(167,139,250,0.08)" stroke="rgba(167,139,250,0.35)" stroke-width="1.5"/>
+      </g>
+      <text x="1035" y="318" text-anchor="middle" font-family="'Fira Code',monospace" font-size="10" font-weight="500" fill="#a78bfa">Ollama</text>
+      <text x="1035" y="333" text-anchor="middle" font-family="'Fira Code',monospace" font-size="9"  fill="#475569">llama3.1:8b</text>
+      <text x="1035" y="347" text-anchor="middle" font-family="'Fira Code',monospace" font-size="9"  fill="#475569">nomic-embed</text>
+      <text x="1035" y="359" text-anchor="middle" font-family="'Fira Code',monospace" font-size="8"  fill="#334155">:11434 · GPU</text>
+
+      <line x1="980" y1="321" x2="984" y2="321" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrowVio)" opacity="0.6"><animate attributeName="stroke-dashoffset" from="0" to="-12" dur="0.8s" repeatCount="indefinite"/></line>
+      <line x1="984" y1="328" x2="980" y2="328" stroke="#a78bfa" stroke-width="1"   stroke-dasharray="4,3" opacity="0.3"><animate attributeName="stroke-dashoffset" from="0" to="12" dur="0.8s" repeatCount="indefinite"/></line>
+    </svg>
+  </div>
+
+  <!-- ── 02. Agentic Loop ───────────────────────────────────────────────── -->
+  <div class="section-title">02 · Agentic Loop</div>
+  <div class="diagram-wrap" style="background:rgba(167,139,250,0.015); border-color:rgba(167,139,250,0.12);">
+    <svg viewBox="0 0 1050 390" width="100%" style="display:block;overflow:visible;">
+      <defs>
+        <marker id="mv" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#a78bfa" opacity="0.9"/></marker>
+        <marker id="mc" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#06b6d4" opacity="0.9"/></marker>
+        <marker id="mg" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#34d399" opacity="0.9"/></marker>
+        <marker id="mr" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#f87171" opacity="0.8"/></marker>
+        <filter id="fv"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="fc"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+
+      <!-- phase labels -->
+      <text x="80"  y="16" text-anchor="middle" font-family="'Fira Code',monospace" font-size="9" fill="#475569" letter-spacing="0.1em">ENTRY</text>
+      <text x="290" y="16" text-anchor="middle" font-family="'Fira Code',monospace" font-size="9" fill="#06b6d4" letter-spacing="0.1em">RETRIEVE</text>
+      <text x="570" y="16" text-anchor="middle" font-family="'Fira Code',monospace" font-size="9" fill="#a78bfa" letter-spacing="0.1em">REFLECT</text>
+      <text x="840" y="16" text-anchor="middle" font-family="'Fira Code',monospace" font-size="9" fill="#34d399" letter-spacing="0.1em">SYNTHESIZE</text>
+
+      <!-- ── Entry ── -->
+      <g filter="url(#fc)">
+        <rect x="20" y="34" width="120" height="64" rx="8" fill="rgba(6,182,212,0.08)" stroke="#06b6d4" stroke-width="1.5"/>
+      </g>
+      <text x="80" y="56"  text-anchor="middle" font-family="'Fira Code',monospace" font-size="10" font-weight="500" fill="#06b6d4">POST</text>
+      <text x="80" y="70"  text-anchor="middle" font-family="'Fira Code',monospace" font-size="9"  fill="#94a3b8">/rag/agent_query</text>
+      <text x="80" y="84"  text-anchor="middle" font-family="'Fira Code',monospace" font-size="8"  fill="#475569">question + ticker</text>
+
+      <line x1="140" y1="66" x2="158" y2="66" stroke="#06b6d4" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#mc)" opacity="0.9"><animate attributeName="stroke-dashoffset" from="0" to="-16" dur="0.7s" repeatCount="indefinite"/></line>
+
+      <!-- ── Retrieve (parallel box) ── -->
+      <rect x="158" y="26" width="264" height="130" rx="9" fill="rgba(6,182,212,0.03)" stroke="rgba(6,182,212,0.2)" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="290" y="44" text-anchor="middle" font-family="'Fira Code',monospace" font-size="8" fill="#06b6d4" letter-spacing="0.08em">asyncio.gather — parallel</text>
+
+      <rect x="168" y="52" width="72" height="60" rx="6" fill="rgba(6,182,212,0.09)" stroke="rgba(6,182,212,0.3)" stroke-width="1"/>
+      <text x="204" y="71"  text-anchor="middle" font-family="'Fira Code',monospace" font-size="9" font-weight="500" fill="#06b6d4">Qdrant</text>
+      <text x="204" y="83"  text-anchor="middle" font-family="'Fira Code',monospace" font-size="8" fill="#475569">embed query</text>
+      <text x="204" y="95"  text-anchor="middle" font-family="'Fira Code',monospace" font-size="8" fill="#06b6d4">top-k = 5</text>
+
+      <rect x="248" y="52" width="72" height="60" rx="6" fill="rgba(52,211,153,0.07)" stroke="rgba(52,211,153,0.28)" stroke-width="1"/>
+      <text x="284" y="71"  text-anchor="middle" font-family="'Fira Code',monospace" font-size="9" font-weight="500" fill="#34d399">Postgres</text>
+      <text x="284" y="83"  text-anchor="middle" font-family="'Fira Code',monospace" font-size="8" fill="#475569">fresh news</text>
+      <text x="284" y="95"  text-anchor="middle" font-family="'Fira Code',monospace" font-size="8" fill="#34d399">latest 8</text>
+
+      <rect x="328" y="52" width="82" height="60" rx="6" fill="rgba(251,191,36,0.06)" stroke="rgba(251,191,36,0.25)" stroke-width="1"/>
+      <text x="369" y="71"  text-anchor="middle" font-family="'Fira Code',monospace" font-size="9" font-weight="500" fill="#fbbf24">Sentiment</text>
+      <text x="369" y="83"  text-anchor="middle" font-family="'Fira Code',monospace" font-size="8" fill="#475569">7-day trend</text>
+      <text x="369" y="95"  text-anchor="middle" font-family="'Fira Code',monospace" font-size="8" fill="#fbbf24">fetch once</text>
+
+      <!-- SSE event row inside retrieve -->
+      <rect x="168" y="122" width="242" height="26" rx="4" fill="rgba(6,182,212,0.05)" stroke="rgba(6,182,212,0.1)" stroke-width="1"/>
+      <text x="289" y="138" text-anchor="middle" font-family="'Fira Code',monospace" font-size="8" fill="#06b6d4">▶ __STEP__retrieve  ·  __STEP__retrieved</text>
+
+      <!-- dedup -->
+      <line x1="422" y1="82" x2="442" y2="82" stroke="#06b6d4" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#mc)" opacity="0.7"><animate attributeName="stroke-dashoffset" from="0" to="-14" dur="0.9s" repeatCount="indefinite"/></line>
+      <rect x="442" y="62" width="90" height="42" rx="6" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+      <text x="487" y="79" text-anchor="middle" font-family="'Fira Code',monospace" font-size="9" fill="#f1f5f9">Article Pool</text>
+      <text x="487" y="93" text-anchor="middle" font-family="'Fira Code',monospace" font-size="8" fill="#475569">URL dedup</text>
+
+      <!-- → Reflect -->
+      <line x1="532" y1="83" x2="550" y2="83" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#mv)" opacity="0.9"><animate attributeName="stroke-dashoffset" from="0" to="-16" dur="0.7s" repeatCount="indefinite"/></line>
+
+      <!-- ── Reflect ── -->
+      <g filter="url(#fv)">
+        <rect x="550" y="26" width="198" height="148" rx="9" fill="rgba(167,139,250,0.06)" stroke="rgba(167,139,250,0.38)" stroke-width="1.5"/>
+      </g>
+      <text x="649" y="47" text-anchor="middle" font-family="'Fira Code',monospace" font-size="10" font-weight="500" fill="#a78bfa">_reflect()</text>
+      <text x="649" y="60" text-anchor="middle" font-family="'Fira Code',monospace" font-size="8"  fill="#475569">llama3.1:8b · format=json</text>
+
+      <rect x="560" y="68" width="178" height="52" rx="5" fill="rgba(0,0,0,0.35)"/>
+      <text x="649" y="84"  text-anchor="middle" font-family="'Fira Code',monospace" font-size="8" fill="#475569">Is context sufficient?</text>
+      <text x="649" y="98"  text-anchor="middle" font-family="'Fira Code',monospace" font-size="8" fill="#a78bfa">→ { sufficient, gap,</text>
+      <text x="649" y="110" text-anchor="middle" font-family="'Fira Code',monospace" font-size="8" fill="#a78bfa">    reformulated_query }</text>
+
+      <text x="649" y="138" text-anchor="middle" font-family="'Fira Code',monospace" font-size="8" fill="#475569">sufficient?</text>
+      <!-- YES label -->
+      <text x="756" y="78" font-family="'Fira Code',monospace" font-size="8" fill="#34d399">YES →</text>
+      <!-- NO loop-back -->
+      <path d="M 649 174 Q 649 232 485 232 Q 290 232 290 156" stroke="#f87171" stroke-width="1.2" stroke-dasharray="5,3" fill="none" marker-end="url(#mr)" opacity="0.5"><animate attributeName="stroke-dashoffset" from="0" to="-16" dur="1.4s" repeatCount="indefinite"/></path>
+      <text x="460" y="248" text-anchor="middle" font-family="'Fira Code',monospace" font-size="8" fill="#f87171">NO — reformulate · re-retrieve  (max 2×)</text>
+
+      <!-- __STEP__ reflect events -->
+      <rect x="560" y="148" width="178" height="20" rx="4" fill="rgba(167,139,250,0.05)" stroke="rgba(167,139,250,0.1)" stroke-width="1"/>
+      <text x="649" y="161" text-anchor="middle" font-family="'Fira Code',monospace" font-size="8" fill="#a78bfa">▶ __STEP__reflect  ·  reflect_ok  ·  requery</text>
+
+      <!-- YES → Synthesize -->
+      <line x1="748" y1="83" x2="768" y2="83" stroke="#34d399" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#mg)" opacity="0.9"><animate attributeName="stroke-dashoffset" from="0" to="-16" dur="0.8s" repeatCount="indefinite"/></line>
+
+      <!-- ── Synthesize ── -->
+      <g filter="url(#fv)">
+        <rect x="768" y="26" width="198" height="148" rx="9" fill="rgba(52,211,153,0.05)" stroke="rgba(52,211,153,0.28)" stroke-width="1.5"/>
+      </g>
+      <text x="867" y="47" text-anchor="middle" font-family="'Fira Code',monospace" font-size="10" font-weight="500" fill="#34d399">Synthesize</text>
+      <text x="867" y="60" text-anchor="middle" font-family="'Fira Code',monospace" font-size="8"  fill="#475569">LlamaIndex  similarity_top_k=3</text>
+
+      <rect x="778" y="68" width="178" height="66" rx="5" fill="rgba(0,0,0,0.35)"/>
+      <text x="778" y="83"  font-family="'Fira Code',monospace" font-size="8" fill="#fbbf24">  [SENTIMENT — 7d avg score]</text>
+      <text x="778" y="96"  font-family="'Fira Code',monospace" font-size="8" fill="#34d399">  [NEWS ARTICLES]</text>
+      <text x="778" y="108" font-family="'Fira Code',monospace" font-size="8" fill="#475569">  headline + 300-char snippet</text>
+      <text x="778" y="120" font-family="'Fira Code',monospace" font-size="8" fill="#475569">  bull · bear · bottom line</text>
+      <text x="778" y="128" font-family="'Fira Code',monospace" font-size="8" fill="#475569">  ──────────────────────</text>
+
+      <rect x="778" y="146" width="178" height="22" rx="4" fill="rgba(52,211,153,0.07)" stroke="rgba(52,211,153,0.18)" stroke-width="1"/>
+      <text x="867" y="157" text-anchor="middle" font-family="'Fira Code',monospace" font-size="8" fill="#34d399">▶ __STEP__synthesize → token stream</text>
+      <text x="867" y="166" text-anchor="middle" font-family="'Fira Code',monospace" font-size="7" fill="#475569">response_gen  →  data: [DONE]</text>
+
+      <!-- ── Guard annotations ── -->
+      <rect x="20" y="290" width="1010" height="1" fill="rgba(255,255,255,0.04)"/>
+      <text x="20" y="308" font-family="'Fira Code',monospace" font-size="8" fill="#475569">◈  Reflect failure (timeout / JSON parse error) → defaults to sufficient=true, never hangs</text>
+      <text x="20" y="323" font-family="'Fira Code',monospace" font-size="8" fill="#475569">◈  reformulated_query == current_query → break immediately (infinite-loop guard)</text>
+      <text x="20" y="338" font-family="'Fira Code',monospace" font-size="8" fill="#475569">◈  Sentiment fetched once on iteration 0, reused on re-retrieve — no redundant DB calls</text>
+      <text x="20" y="353" font-family="'Fira Code',monospace" font-size="8" fill="#475569">◈  No ticker → Postgres news + sentiment skipped (_noop), Qdrant-only retrieval</text>
+      <text x="20" y="368" font-family="'Fira Code',monospace" font-size="8" fill="#a78bfa">◈  Sync Qdrant + Ollama calls run via run_in_executor — never blocks the async event loop</text>
+    </svg>
+  </div>
+
+  <!-- ── 02. Step Events ────────────────────────────────────────────────── -->
+  <div class="section-title">02 · SSE Step Events</div>
+  <div class="diagram-wrap" style="padding:20px 28px;">
+    <svg viewBox="0 0 1050 140" width="100%" style="display:block;">
+      <defs>
+        <marker id="sa" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto"><path d="M0,0 L0,5 L7,2.5 z" fill="#475569" opacity="0.6"/></marker>
+      </defs>
+
+      <!-- Timeline line -->
+      <line x1="30" y1="60" x2="1020" y2="60" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+
+      <!-- Events -->
+      <!-- retrieve -->
+      <circle cx="80"  cy="60" r="5" fill="#06b6d4" opacity="0.8"/>
+      <text x="80"  y="48" text-anchor="middle" font-family="'Fira Code',monospace" font-size="9" fill="#06b6d4">__STEP__</text>
+      <text x="80"  y="36" text-anchor="middle" font-family="'Fira Code',monospace" font-size="9" fill="#06b6d4">retrieve</text>
+      <text x="80"  y="79" text-anchor="middle" font-family="'Fira Code',monospace" font-size="7" fill="#475569">Searching: "…"</text>
+
+      <!-- retrieved -->
+      <circle cx="230" cy="60" r="5" fill="#06b6d4" opacity="0.6"/>
+      <text x="230" y="48" text-anchor="middle" font-family="'Fira Code',monospace" font-size="9" fill="#06b6d4">__STEP__</text>
+      <text x="230" y="36" text-anchor="middle" font-family="'Fira Code',monospace" font-size="9" fill="#06b6d4">retrieved</text>
+      <text x="230" y="79" text-anchor="middle" font-family="'Fira Code',monospace" font-size="7" fill="#475569">Found N articles</text>
+
+      <!-- reflect -->
+      <circle cx="400" cy="60" r="5" fill="#a78bfa" opacity="0.8"/>
+      <text x="400" y="48" text-anchor="middle" font-family="'Fira Code',monospace" font-size="9" fill="#a78bfa">__STEP__</text>
+      <text x="400" y="36" text-anchor="middle" font-family="'Fira Code',monospace" font-size="9" fill="#a78bfa">reflect</text>
+      <text x="400" y="79" text-anchor="middle" font-family="'Fira Code',monospace" font-size="7" fill="#475569">Evaluating quality…</text>
+
+      <!-- branch label -->
+      <text x="555" y="20" text-anchor="middle" font-family="'Fira Code',monospace" font-size="8" fill="#334155">if gap found</text>
+      <path d="M 460 60 Q 510 60 555 110" stroke="#f87171" stroke-width="1" stroke-dasharray="4,3" fill="none" opacity="0.5"/>
+      <text x="555" y="125" text-anchor="middle" font-family="'Fira Code',monospace" font-size="9" fill="#f87171">__STEP__requery</text>
+      <text x="555" y="138" text-anchor="middle" font-family="'Fira Code',monospace" font-size="7" fill="#475569">loop back ≤ 2×</text>
+
+      <!-- reflect_ok -->
+      <circle cx="580" cy="60" r="5" fill="#34d399" opacity="0.8"/>
+      <text x="580" y="48" text-anchor="middle" font-family="'Fira Code',monospace" font-size="9" fill="#34d399">__STEP__</text>
+      <text x="580" y="36" text-anchor="middle" font-family="'Fira Code',monospace" font-size="9" fill="#34d399">reflect_ok</text>
+      <text x="580" y="79" text-anchor="middle" font-family="'Fira Code',monospace" font-size="7" fill="#475569">Sufficient</text>
+
+      <!-- synthesize -->
+      <circle cx="760" cy="60" r="5" fill="#34d399" opacity="0.8"/>
+      <text x="760" y="48" text-anchor="middle" font-family="'Fira Code',monospace" font-size="9" fill="#34d399">__STEP__</text>
+      <text x="760" y="36" text-anchor="middle" font-family="'Fira Code',monospace" font-size="9" fill="#34d399">synthesize</text>
+      <text x="760" y="79" text-anchor="middle" font-family="'Fira Code',monospace" font-size="7" fill="#475569">Generating…</text>
+
+      <!-- token stream -->
+      <rect x="880" y="48" width="130" height="24" rx="4" fill="rgba(167,139,250,0.08)" stroke="rgba(167,139,250,0.2)" stroke-width="1"/>
+      <text x="945" y="63" text-anchor="middle" font-family="'Fira Code',monospace" font-size="9" fill="#a78bfa">token stream →</text>
+      <text x="945" y="79" text-anchor="middle" font-family="'Fira Code',monospace" font-size="7" fill="#475569">data: [DONE]</text>
+      <circle cx="880" cy="60" r="5" fill="#a78bfa" opacity="0.5"/>
+
+      <!-- connecting ticks -->
+      <line x1="85"  y1="60" x2="225" y2="60" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+      <line x1="235" y1="60" x2="395" y2="60" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+      <line x1="405" y1="60" x2="575" y2="60" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+      <line x1="585" y1="60" x2="755" y2="60" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+      <line x1="765" y1="60" x2="880" y2="60" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+    </svg>
+  </div>
+
+  <!-- ── 03. Endpoints ──────────────────────────────────────────────────── -->
+  <div class="section-title">03 · Endpoints</div>
+  <div class="cards-row cards-row-3">
+    <div class="card" style="border-color:rgba(6,182,212,0.2); background:rgba(6,182,212,0.02);">
+      <div class="card-label"><div class="dot"></div>POST /rag/query</div>
+      <p>Single-pass dual context (Postgres + Qdrant). Streams tokens via SSE. Lower latency, no reflect step.</p>
+      <div style="margin-top:12px;">
+        <span class="tech badge-cyan">SSE</span>
+        <span class="tech badge-muted">top-k=5</span>
+      </div>
+    </div>
+    <div class="card" style="border-color:rgba(167,139,250,0.2); background:rgba(167,139,250,0.02);">
+      <div class="card-label" style="color:#a78bfa;"><div class="dot" style="background:#a78bfa;box-shadow:0 0 5px #a78bfa;"></div>POST /rag/agent_query</div>
+      <p>Full agentic loop. Emits <strong>__STEP__</strong> events before token stream. Frontend renders live reasoning trace.</p>
+      <div style="margin-top:12px;">
+        <span class="tech badge-vio">agentic</span>
+        <span class="tech badge-vio">__STEP__ events</span>
+        <span class="tech badge-muted">MAX_ITER=2</span>
+      </div>
+    </div>
+    <div class="card" style="border-color:rgba(52,211,153,0.2); background:rgba(52,211,153,0.02);">
+      <div class="card-label" style="color:#34d399;"><div class="dot" style="background:#34d399;box-shadow:0 0 5px #34d399;"></div>POST /rag/query_once</div>
+      <p>Non-streaming fallback. Buffers all tokens and returns a single JSON response for clients that can't consume SSE.</p>
+      <div style="margin-top:12px;">
+        <span class="tech badge-green">JSON</span>
+        <span class="tech badge-muted">no-SSE fallback</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div style="margin-top:8px; padding-top:20px; border-top:1px solid rgba(255,255,255,0.05); display:flex; justify-content:space-between; font-family:'Fira Code',monospace; font-size:10px; color:#475569;">
+    <span>FINSIGHT AGENTIC RAG · v0.2.0</span>
+    <span>2026-04-28</span>
+  </div>
+
+</div>
+</body>
+</html>
